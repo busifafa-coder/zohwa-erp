@@ -506,18 +506,122 @@
   .r-kind{font-size:10.5px; font-weight:700; border-radius:5px; padding:1px 7px;}
   .r-kind.staff{color:var(--green-deep); background:var(--green-soft);}
   .r-kind.out{color:#8a5310; background:#fde7d6;}
+  /* 직원/외주 2단 레이아웃 */
+  .staff-cols{display:flex; gap:14px; align-items:flex-start;}
+  .staff-col{flex:1 1 0; min-width:0;}
+  .staff-col-head{display:flex; align-items:center; justify-content:space-between; gap:8px; margin:0 2px 9px; font-size:13px; font-weight:800; color:var(--green-deep);}
+  .btn.btn-sm{padding:7px 11px; font-size:12px;}
+  .staff-col .row1{padding:11px 12px;}
+  @media (max-width:640px){ .staff-cols{flex-direction:column; gap:18px;} }
+  /* 담당자 배정 그룹 라벨 (직원/외주 구분) */
+  .wk-grp-label{width:100%; font-size:11px; font-weight:800; color:var(--muted); letter-spacing:.02em; margin:4px 0 2px;}
+  .wk-grp-label.out{color:#8a5310;}
+  /* 외주 작업 일지 */
+  .ow-head{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .ow-total{flex:0 0 auto; text-align:right; line-height:1.05;}
+  .ow-total span{font-size:30px; font-weight:800; color:var(--green-deep);}
+  .ow-total small{display:block; font-size:11px; color:var(--muted); font-weight:600; margin-top:2px;}
+  .r-mday{color:var(--green-deep); font-weight:700; font-size:12.5px;}
 
   @media print{
     header.app, .doc-toolbar, .demo-note, #toast{display:none !important;}
-    #homeView, #quoteView, #settingsView, #contractView, #settleView, #contractsView, #salesmgmtView, #duemgmtView, #workView, #scheduleView, #csignView, #smslogView{display:none !important;}
+    #homeView, #quoteView, #settingsView, #contractView, #settleView, #contractsView, #salesmgmtView, #duemgmtView, #workView, #scheduleView, #outworkView, #csignView, #smslogView{display:none !important;}
     body{background:#fff;}
     .wrap{padding:0; width:100%;}
     .doc-paper{box-shadow:none; border:none; border-radius:0; width:100%; margin:0; padding:0;}
     @page{size:A4; margin:14mm;}
   }
+
+  /* ===== 로그인 화면 ===== */
+  body.pre-auth{overflow:hidden;}
+  body.pre-auth header.app, body.pre-auth .wrap{display:none !important;}
+  #loginScreen{display:none;}
+  body.pre-auth #loginScreen{
+    display:flex; position:fixed; inset:0; z-index:1000;
+    align-items:center; justify-content:center; padding:24px;
+    background:radial-gradient(900px 480px at 100% -10%, rgba(47,107,79,.10), transparent 60%), var(--bg);
+  }
+  .login-card{
+    width:100%; max-width:380px; background:var(--surface);
+    border:1px solid var(--line); border-radius:18px; padding:34px 30px 30px;
+    box-shadow:var(--shadow-lg);
+  }
+  .login-brand{display:flex; align-items:center; gap:11px; margin-bottom:26px;}
+  .login-brand .mark{width:38px; height:38px; border-radius:11px; background:var(--green); display:grid; place-items:center; box-shadow:0 4px 12px rgba(35,79,59,.30);}
+  .login-brand .mark svg{width:22px; height:22px;}
+  .login-brand .name{font-size:19px; font-weight:800; letter-spacing:-.02em;}
+  .login-brand .sub{font-size:12.5px; color:var(--muted); font-weight:500; margin-top:1px;}
+  .login-card h2{font-size:17px; font-weight:750; margin-bottom:4px;}
+  .login-card .lead{font-size:13px; color:var(--muted); margin-bottom:22px;}
+  .login-field{margin-bottom:13px;}
+  .login-field label{display:block; font-size:12.5px; font-weight:650; color:var(--muted); margin-bottom:6px;}
+  .login-field input{
+    width:100%; font-family:inherit; font-size:15px; color:var(--ink);
+    border:1px solid var(--line); border-radius:10px; padding:12px 13px; background:#fff;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .login-field input:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(47,107,79,.12);}
+  .login-btn{
+    width:100%; margin-top:9px; font-family:inherit; font-size:15px; font-weight:700; color:#fff;
+    background:var(--green); border:none; border-radius:10px; padding:13px; cursor:pointer;
+    transition:background .15s, opacity .15s;
+  }
+  .login-btn:hover{background:var(--green-deep);}
+  .login-btn:disabled{opacity:.6; cursor:default;}
+  .login-err{min-height:18px; margin-top:11px; font-size:12.5px; color:var(--warn); text-align:center;}
+  .login-foot{margin-top:18px; padding-top:16px; border-top:1px solid var(--line-soft); font-size:11.5px; color:var(--muted); text-align:center; line-height:1.6;}
+
+  /* 세션 확인 중: 로그인 폼 대신 스플래시(깜빡임 방지) */
+  .auth-splash{display:none;}
+  body.auth-checking #loginScreen .login-card{display:none;}
+  body.auth-checking #loginScreen .auth-splash{display:flex; align-items:center; justify-content:center;}
+  .auth-spin{width:30px; height:30px; border:3px solid var(--line); border-top-color:var(--green); border-radius:50%; animation:authspin .7s linear infinite;}
+  @keyframes authspin{to{transform:rotate(360deg);}}
+
+  /* 헤더 우측: 역할 칩 + 로그아웃 */
+  .logout-btn{display:inline-flex; align-items:center; gap:5px; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--muted); background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; cursor:pointer; transition:all .15s;}
+  .logout-btn:hover{border-color:var(--warn); color:var(--warn);}
+
+  /* ===== 상단 빠른 이동 네비게이션 ===== */
+  .topnav{width:75%; margin:0 auto; padding:0 18px 10px; display:flex; gap:8px; flex-wrap:wrap;}
+  .nav-btn{display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-size:13px; font-weight:650; color:var(--green-deep); background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:7px 13px; cursor:pointer; transition:all .15s; white-space:nowrap;}
+  .nav-btn svg{width:15px; height:15px;}
+  .nav-btn:hover{background:var(--green-soft); border-color:#cfe2d4;}
+  .nav-btn.nav-home{color:var(--muted);}
+  @media (max-width:760px){
+    .topnav{width:100%; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding:0 12px 9px;}
+    .nav-btn{font-size:12.5px; padding:7px 11px;}
+    .nav-btn .nav-tx{display:inline;}
+  }
+  @media print{ .topnav{display:none !important;} }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body>
+<body class="pre-auth auth-checking">
+
+<!-- ============ 로그인 ============ -->
+<div id="loginScreen">
+  <div id="authSplash" class="auth-splash"><div class="auth-spin"></div></div>
+  <div class="login-card">
+    <div class="login-brand">
+      <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 3-9 7-11 4 2 7 6 7 11a7 7 0 0 1-7 7Z"/><path d="M11 20v-9"/></svg></div>
+      <div><div class="name">조화닷컴</div><div class="sub">플랜테리어 업무 시스템</div></div>
+    </div>
+    <h2>로그인</h2>
+    <p class="lead">아이디와 비밀번호를 입력하세요.</p>
+    <div class="login-field">
+      <label for="loginUser">아이디</label>
+      <input id="loginUser" type="text" autocomplete="username" placeholder="아이디" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="login-field">
+      <label for="loginPass">비밀번호</label>
+      <input id="loginPass" type="password" autocomplete="current-password" placeholder="비밀번호" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button id="loginBtn" class="login-btn" onclick="doLogin()">로그인</button>
+    <div id="loginErr" class="login-err"></div>
+    <div class="login-foot">조화닷컴 ERP · 권한별 업무 시스템</div>
+  </div>
+</div>
 
 <header class="app">
   <div class="app-inner">
@@ -526,13 +630,24 @@
       <div><div class="name">조화닷컴</div><div class="sub">플랜테리어 업무 시스템</div></div>
     </div>
     <div class="head-right">
-      <button class="gear" onclick="openSettings()" title="회사 정보 설정">
+      <button id="gearSettings" class="gear" onclick="openSettings()" title="회사 정보 설정">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span class="gear-tx">설정</span>
       </button>
-      <span class="admin-chip">관리자</span>
+      <span id="roleChip" class="admin-chip">관리자</span>
+      <button id="logoutBtn" class="logout-btn" onclick="logout()" title="로그아웃">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>
+        <span>로그아웃</span>
+      </button>
     </div>
   </div>
+  <nav id="topNav" class="topnav">
+    <button class="nav-btn nav-home" onclick="showView('home')" title="홈"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span class="nav-tx">홈</span></button>
+    <button id="navQuote" class="nav-btn" onclick="newQuote()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg><span class="nav-tx">견적문의</span></button>
+    <button id="navContract" class="nav-btn" onclick="openQuotes()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg><span class="nav-tx">계약서 작성</span></button>
+    <button id="navSettle" class="nav-btn" onclick="openSettle()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="nav-tx">정산 관리</span></button>
+    <button id="navWork" class="nav-btn" onclick="openWork()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg><span class="nav-tx">시공 관리</span></button>
+  </nav>
 </header>
 
 <div class="wrap">
@@ -541,14 +656,14 @@
   <section id="homeView" class="view">
     <div class="page-head"><h1>업무 메뉴</h1><p>처리할 업무를 선택하세요.</p></div>
     <div class="cats">
-      <button class="cat active" onclick="newQuote()">
+      <button id="cardQuote" class="cat active" onclick="newQuote()">
         <span class="arrow">→</span>
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></svg></div>
         <h3>견적문의</h3><div class="desc">새 견적 작성 · 견적서 출력</div>
       </button>
-      <button class="cat active" onclick="openQuotes()"><span class="arrow">→</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg></div><h3>계약서 작성</h3><div class="desc">견적 선택 · 계약서 작성 · 출력</div></button>
-      <button class="cat active" onclick="openSettle()"><span class="arrow">→</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><h3>정산 관리</h3><div class="desc">입금 확인 · 매출 정산</div></button>
-      <button class="cat active" onclick="openWork()"><span class="arrow">→</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg></div><h3>시공 관리</h3><div class="desc">시공완료 입력 · 직원 관리</div></button>
+      <button id="cardContract" class="cat active" onclick="openQuotes()"><span class="arrow">→</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="m9 14 2 2 4-4"/></svg></div><h3>계약서 작성</h3><div class="desc">견적 선택 · 계약서 작성 · 출력</div></button>
+      <button id="cardSettle" class="cat active" onclick="openSettle()"><span class="arrow">→</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><h3>정산 관리</h3><div class="desc">입금 확인 · 매출 정산</div></button>
+      <button id="cardWork" class="cat active" onclick="openWork()"><span class="arrow">→</span><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13A4 4 0 0 1 16 11"/></svg></div><h3>시공 관리</h3><div class="desc">시공완료 입력 · 직원 관리</div></button>
     </div>
   </section>
 
@@ -631,7 +746,7 @@
     <div class="qbar"><button class="back" onclick="showView('home')">← 메뉴</button><h2>계약서 작성</h2></div>
     <div class="settle-add">
       <button class="btn btn-primary" onclick="newQuote()">+ 새 견적 작성</button>
-      <button class="btn btn-ghost" onclick="openContract()">견적 없이 계약서 작성</button>
+      <button class="btn btn-ghost" onclick="newContract()">견적 없이 계약서 작성</button>
       <button class="btn btn-ghost" onclick="openSmsLog('quote')">견적 문자 내역</button>
     </div>
     <div class="quote-head">
@@ -774,7 +889,7 @@
 
     <p class="demo-note">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      <span>등록하면 <b>계약서 발송 리스트</b>에 올라가고 갑에게 서명 요청 문자가 나갑니다(데모: 링크 복사). 갑 서명 후 <b>서명된 계약서 리스트</b>로 이동하며 정산에 매출로 자동 반영됩니다.</span>
+      <span>등록하면 <b>계약서 발송 리스트</b>에 올라가고 갑에게 서명 요청 문자가 실제로 발송됩니다. 갑 서명 후 <b>서명된 계약서 리스트</b>로 이동하며 정산에 매출로 자동 반영됩니다.</span>
     </p>
   </section>
 
@@ -925,7 +1040,7 @@
 
     <div class="send-banner">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      <span>경과 <b>4일·14일·29일</b>이 되는 고객에게는 <b>자동 안내 문자</b>가 발송됩니다. <b>30일 이상</b>은 아래에서 직접 선택·작성해 발송합니다. 모든 고객 문자는 <b>당일 14~16시</b>에 발송되며, 발송 내역은 <b>문자 발송 내역</b>에서 확인할 수 있어요.</span>
+      <span>경과 <b>4일·14일·29일</b>이 되는 고객에게는 <b>자동 안내 문자</b>가 <b>당일 14:00</b>에 발송 예약됩니다. <b>30일 이상</b>은 아래에서 직접 선택·작성해 <b>즉시 발송</b>합니다. 발송 내역은 <b>문자 발송 내역</b>에서 확인할 수 있어요.</span>
     </div>
 
     <div class="settle-add">
@@ -937,14 +1052,14 @@
     <div class="dm-tiers" id="dmTiers"></div>
 
     <div class="due-panel" id="duePanel30" style="display:none;">
-      <div class="dp-title">30일 이상 미수 · 직접 문자 발송 <span class="hint" style="font-weight:500; color:var(--muted);">· 보낼 고객을 선택하세요 (당일 14~16시 발송)</span></div>
+      <div class="dp-title">30일 이상 미수 · 직접 문자 발송 <span class="hint" style="font-weight:500; color:var(--muted);">· 보낼 고객을 선택하세요 (즉시 발송)</span></div>
       <div class="due-check-list" id="due30List"></div>
       <div class="f"><label>발송 문구 <span class="hint">· {client} {company} {title} {amount} {bank} 사용 가능</span></label>
         <textarea class="in" id="due30Msg" rows="5"></textarea>
       </div>
       <div class="modal-btns" style="margin-top:12px; justify-content:flex-end;">
         <button class="btn btn-ghost" onclick="resetDue30Msg()">문구 초기화</button>
-        <button class="btn btn-primary" onclick="sendDue30()">선택 고객에게 발송 예약 →</button>
+        <button class="btn btn-primary" onclick="sendDue30()">선택 고객에게 발송 →</button>
       </div>
     </div>
 
@@ -979,7 +1094,7 @@
 
     <button class="plan-enter" onclick="openSchedule()">
       <span class="pe-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
-      <span class="pe-tx"><h4>월별 시공 계획표</h4><p>달력에서 일정·담당자·인원·작업내용을 메모로 관리</p></span>
+      <span class="pe-tx"><h4>월별 시공 계획표</h4><p>달력 날짜를 눌러 메모를 추가·관리</p></span>
       <span class="pe-arrow">→</span>
     </button>
 
@@ -997,15 +1112,20 @@
     <div id="workList"></div>
 
     <div class="card-title" style="margin:24px 2px 10px;">직원 · 외주 관리 <span class="hint">· 시공 담당자</span></div>
-    <div class="staff-add-row">
-      <button class="btn btn-ghost" onclick="openStaffModal(null,'직원')">+ 직원 추가</button>
-      <button class="btn btn-ghost" onclick="openStaffModal(null,'외주')">+ 외주 추가</button>
+    <div class="staff-cols">
+      <div class="staff-col">
+        <div class="staff-col-head"><span>직원</span><button class="btn btn-ghost btn-sm staff-admin-only" onclick="openStaffModal(null,'직원')">+ 직원 추가</button></div>
+        <div id="staffListEmp"></div>
+      </div>
+      <div class="staff-col">
+        <div class="staff-col-head"><span>외주</span><button class="btn btn-ghost btn-sm staff-admin-only" onclick="openStaffModal(null,'외주')">+ 외주 추가</button></div>
+        <div id="staffListOut"></div>
+      </div>
     </div>
-    <div id="staffList"></div>
 
     <p class="demo-note">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      <span>계약서가 <b>서명 완료</b>되면 시공 건으로 올라옵니다. 시공을 마치면 건을 눌러 <b>시공완료일·담당자</b>를 입력하세요 — 그 날짜부터 미수 경과일이 계산됩니다. 시공 건은 <b>월별 시공 계획표</b>에도 함께 표시됩니다.</span>
+      <span>계약서가 <b>서명 완료</b>되면 시공 건으로 올라옵니다. 시공을 마치면 건을 눌러 <b>시공완료일·담당자</b>를 입력하세요. 외주는 <b>[작업기록]</b>에서 월별 작업 일수·내역을 보고 추가·수정할 수 있어요. 시공 건은 <b>월별 시공 계획표</b>에도 함께 표시됩니다.</span>
     </p>
   </section>
 
@@ -1031,6 +1151,36 @@
     <p class="demo-note">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
       <span><b>시공 건(주황)</b>은 시공 현황과 연동됩니다 — 클릭하면 시공완료일·담당자를 <b>수정</b>하고 <b>담당자에게 문자</b>를 보낼 수 있어요. 날짜를 누르면 <b>메모 일정</b>을 추가하고, 메모(초록)를 누르면 수정·삭제됩니다. (데모: 새로고침 시 초기화)</span>
+    </p>
+  </section>
+
+  <!-- ============ 외주 작업 일지 ============ -->
+  <section id="outworkView" class="view hidden">
+    <div class="qbar"><button class="back" onclick="showView('work')">← 시공 관리</button><h2>외주 작업 일지</h2></div>
+
+    <div class="card"><div class="card-pad">
+      <div class="ow-head">
+        <div>
+          <div class="card-title" style="margin:0;" id="owName">외주</div>
+          <div class="hint" id="owRole" style="margin-top:2px;"></div>
+        </div>
+        <div class="ow-total"><span id="owDays">0</span><small>일 / 이번 달</small></div>
+      </div>
+      <div class="period-bar" style="margin-top:14px;">
+        <span class="period-sel" style="display:inline-flex; align-items:center; font-weight:800; color:var(--green-deep); font-size:15px; max-width:none;" id="owYmLabel">—</span>
+        <span class="range-grp">
+          <input type="month" class="in sm-range" id="owMonth" onchange="changeOutworkMonth()">
+          <button class="btn-range" onclick="openOutworkModal(null)">+ 작업 추가</button>
+        </span>
+      </div>
+    </div></div>
+
+    <div class="card-title" style="margin:4px 2px 10px;">작업 내역 <span class="hint" id="owListHint">· 해당 월</span></div>
+    <div id="owList"></div>
+
+    <p class="demo-note">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+      <span>외주별 <b>월 작업 일수</b>와 작업 내역입니다. 시공완료 시 <b>시공 시작~종료일의 일수</b>가 자동 합산되고(예: 3박4일=4일), <b>+ 작업 추가</b>로 직접 등록할 수 있어요. 반나절은 <b>0.5일</b>로 입력합니다.</span>
     </p>
   </section>
 
@@ -1102,7 +1252,7 @@
     <div id="smsLogList"></div>
     <p class="demo-note">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-      <span>견적·계약·미수금·시공에서 발송한 문자가 모두 기록됩니다. 고객 안내 문자는 <b>당일 14~16시</b>에 발송되도록 예약되며, 행을 누르면 보낸 내용을 볼 수 있어요. (데모: 실제 발송은 서버 연결 후)</span>
+      <span>견적·계약·미수금·시공에서 발송한 문자가 모두 기록됩니다. <b>미수금 자동 안내 문자만</b> 해당 고객에게 <b>설정일 14:00</b>에 발송 예약되고, 나머지는 <b>즉시 발송</b>됩니다. 행을 누르면 보낸 내용을 볼 수 있어요. (데모: 실제 발송은 서버 연결 후)</span>
     </p>
   </section>
 
@@ -1140,7 +1290,7 @@
   <div class="modal-box">
     <div class="card-title" id="smsTitle" style="margin-bottom:10px;">문자</div>
     <textarea id="smsBody" class="in" rows="8" style="width:100%;"></textarea>
-    <div class="sms-note">실제 발송은 서버 연결 후 가능합니다. 지금은 복사해서 카톡·문자로 붙여넣어 보낼 수 있어요. (데모)</div>
+    <div class="sms-note">문자는 솔라피로 실제 발송됩니다. 아래 내용을 복사해 카톡으로도 보낼 수 있어요.</div>
     <div class="modal-btns" style="margin-top:14px;">
       <button class="btn btn-ghost" onclick="closeSms()">닫기</button>
       <button class="btn btn-primary" onclick="copySms()">복사</button>
@@ -1175,11 +1325,8 @@
     <div class="sms-note" id="workModalInfo" style="margin:0 0 12px;"></div>
     <div class="f"><label>시공 예정일 <span class="hint">· 달력 표시 기준 · 계약서에 반영</span></label><input class="in" type="date" id="wkStartDate"></div>
     <div class="f" style="margin-top:10px;"><label>시공 완료일 <span class="hint">· 입력 시 미수 경과일 계산 시작</span></label><input class="in" type="date" id="wkCompDate"></div>
-    <div class="f" style="margin-top:10px;"><label>담당자 배정 <span class="hint">· 여러 명 선택 가능</span></label>
+    <div class="f" style="margin-top:10px;"><label>담당자 배정 <span class="hint">· 직원 → 외주 순 · 여러 명 선택 가능</span></label>
       <div id="wkWorkerChecks" class="worker-checks"></div>
-    </div>
-    <div class="f" style="margin-top:12px;"><label>외주·기타 담당자 <span class="hint">· 목록에 없는 인원 직접 입력 (쉼표로 구분)</span></label>
-      <input class="in" id="wkWorkerExtra" placeholder="예: 김외주, 협력업체 이○○">
     </div>
     <div class="modal-btns" style="margin-top:14px; flex-wrap:wrap;">
       <button class="btn btn-ghost" onclick="closeWorkModal()">닫기</button>
@@ -1193,8 +1340,7 @@
 <div id="staffModal" class="modal-overlay hidden">
   <div class="modal-box">
     <div class="card-title" id="staffModalTitle" style="margin-bottom:10px;">직원 추가</div>
-    <div class="f"><label>구분</label><select class="in" id="stKind2"><option value="직원">직원</option><option value="외주">외주</option></select></div>
-    <div class="f" style="margin-top:10px;"><label>이름 / 업체명</label><input class="in" id="stName2" placeholder="직원명 또는 외주 업체명"></div>
+    <div class="f"><label id="stNameLabel">이름</label><input class="in" id="stName2" placeholder="직원명"></div>
     <div class="f" style="margin-top:10px;"><label>연락처 <span class="hint">· 담당자 문자 발송에 사용</span></label><input class="in" id="stTel2" type="tel" inputmode="tel" placeholder="010-0000-0000"></div>
     <div class="f" style="margin-top:10px;"><label>역할</label><input class="in" id="stRole2" placeholder="예: 시공팀장 / 식재 / 운반"></div>
     <div class="modal-btns" style="margin-top:14px;">
@@ -1204,14 +1350,26 @@
     </div>
   </div>
 </div>
+<div id="outworkModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <div class="card-title" id="outworkModalTitle" style="margin-bottom:10px;">외주 작업 추가</div>
+    <div class="f"><label>외주</label><select class="in" id="owStaff"></select></div>
+    <div class="f" style="margin-top:10px;"><label>작업일</label><input class="in" type="date" id="owDate"></div>
+    <div class="f" style="margin-top:10px;"><label>작업 일수</label><select class="in" id="owDaysSel"><option value="0.5">0.5일 (반나절)</option><option value="1" selected>1일</option><option value="1.5">1.5일</option><option value="2">2일</option><option value="2.5">2.5일</option><option value="3">3일</option><option value="4">4일</option><option value="5">5일</option><option value="6">6일</option><option value="7">7일</option></select></div>
+    <div class="f" style="margin-top:10px;"><label>현장 / 시공명</label><input class="in" id="owTitle" placeholder="예: 강북 벽면녹화"></div>
+    <div class="f" style="margin-top:10px;"><label>메모 <span class="hint">· 선택</span></label><input class="in" id="owNote" placeholder="단가, 인원, 비고 등"></div>
+    <div class="modal-btns" style="margin-top:14px;">
+      <button class="btn btn-danger" id="owDelBtn" style="display:none;" onclick="deleteOutworkFromModal()">삭제</button>
+      <button class="btn btn-ghost" onclick="closeOutworkModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveOutwork()">저장</button>
+    </div>
+  </div>
+</div>
 <div id="schedModal" class="modal-overlay hidden">
   <div class="modal-box">
-    <div class="card-title" id="schedModalTitle" style="margin-bottom:10px;">일정 추가</div>
+    <div class="card-title" id="schedModalTitle" style="margin-bottom:10px;">메모 추가</div>
     <div class="f"><label>날짜</label><input class="in" type="date" id="schDate"></div>
-    <div class="f" style="margin-top:10px;"><label>작업 내용</label><input class="in" id="schTitle" placeholder="예: ○○카페 화분 식재 / 납품"></div>
-    <div class="f" style="margin-top:10px;"><label>담당자 <span class="hint">· 직원명 또는 외주 직접 입력</span></label><input class="in" id="schWorker" list="schStaffList" placeholder="예: 김팀장, 외주 이○○"><datalist id="schStaffList"></datalist></div>
-    <div class="f" style="margin-top:10px;"><label>인원</label><div class="manual-input-wrap"><input class="in" id="schCount" inputmode="numeric" placeholder="0" style="text-align:right; padding-right:36px;"><span style="position:absolute; right:12px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:14px; pointer-events:none;">명</span></div></div>
-    <div class="f" style="margin-top:10px;"><label>메모 <span class="hint">· 선택</span></label><textarea class="in" id="schMemo" rows="3" placeholder="참고 사항, 자재, 현장 메모 등"></textarea></div>
+    <div class="f" style="margin-top:10px;"><label>메모</label><textarea class="in" id="schMemo" rows="4" placeholder="시공 일정·담당자·인원·현장 메모 등 자유롭게 입력"></textarea></div>
     <div class="modal-btns" style="margin-top:16px; flex-wrap:wrap;">
       <button class="btn btn-danger" id="schDelBtn" onclick="deleteSchedEntry()" style="display:none;">삭제</button>
       <button class="btn btn-ghost" onclick="closeSchedModal()">취소</button>
@@ -1464,42 +1622,40 @@
   }
 
   function quoteSmsText(q){
-    return '안녕하세요, '+(q.client||'고객')+'님. '+(SUPPLIER.name||'조화닷컴')+'입니다.\n\n요청하신 ['+(firstLine(q.work)||'시공')+'] 견적서를 보내드립니다.\n· 견적 금액 ₩'+won(q.total||0)+'\n\n자세한 내용은 첨부 견적서를 확인해 주세요. 궁금하신 점은 회신 부탁드립니다. 감사합니다.';
+    var link='https://zh.zohwa.com/quote/'+q.id+'-'+(q.id*7+19);
+    return '안녕하세요, '+(q.client||'고객')+'님. '+(SUPPLIER.name||'조화닷컴')+'입니다.^^\n\n요청하신 ['+(firstLine(q.work)||'시공')+'] 견적서를 보내드립니다.\n· 견적 금액 ₩'+won(q.total||0)+' 원\n\n아래 주소를 클릭하시면 견적서를 모바일·PC에서 바로 확인하실 수 있습니다.\n'+link+'\n\n궁금하신 점은 회신 부탁드립니다. 감사합니다.';
   }
-  function saveQuote(){
+  async function saveQuote(){
     if(confirmMode==='manual' && !manualConfirmed){ showToast('수동 금액 입력 후 [확인]을 눌러주세요.'); return; }
     var d=collectQuoteData();
     if(!d.client && !(d.items && d.items.length) && !d.total){ showToast('고객명 또는 견적 항목을 입력해 주세요.'); return; }
     if(window._editingQuoteId){
-      var q=_findQuote(window._editingQuoteId);
-      if(q){ for(var k in d){ q[k]=d[k]; } }
+      await dbUpdateQuote(window._editingQuoteId, d);
       showToast('✓ 견적서가 수정되었습니다 · 합계 ₩'+won(d.total));
     } else {
-      var id=++_quoteSeq;
-      var rec={id:id, created:isoToday()};
-      for(var k2 in d){ rec[k2]=d[k2]; }
-      _quotes.unshift(rec);
-      if(rec.client || rec.tel){
-        var sm=logSms({kind:'quote', client:rec.client||'고객', phone:rec.tel||'', text:quoteSmsText(rec), refId:id});
-        showToast('✓ 견적 저장 · 고객에게 견적 안내 문자를 '+sm.whenLabel+'로 발송합니다.');
+      var saved=await dbInsertQuote(d);
+      if(!saved){ return; }   // 저장 실패 시 중단(alert는 dbInsertQuote가 표시)
+      if(saved.client || saved.tel){
+        logSms({kind:'quote', client:saved.client||'고객', phone:saved.tel||'', text:quoteSmsText(saved), refId:saved.id});
+        showToast('✓ 견적 저장 · 고객에게 견적서 확인 문자를 발송했습니다.');
       } else {
         showToast('✓ 견적서가 저장되었습니다 · 합계 ₩'+won(d.total));
       }
     }
     window._editingQuoteId=null;
     resetQuoteForm();
-    renderQuotes();
+    await loadQuotes();
     showView('home');
   }
 
-  function openQuotes(){ var qs=document.getElementById('quoteSearch'); if(qs) qs.value=''; renderQuotes(); showView('quotes'); }
+  async function openQuotes(){ var qs=document.getElementById('quoteSearch'); if(qs) qs.value=''; await loadQuotes(); showView('quotes'); }
   function newQuote(){ resetQuoteForm(); window._editingQuoteId=null; showView('quote'); }
   function editQuote(id){ var q=_findQuote(id); if(!q) return; fillQuoteForm(q); window._editingQuoteId=id; showView('quote'); }
   function deleteQuote(id){
     var q=_findQuote(id); if(!q) return;
-    confirmAction('이 견적서를 삭제할까요?\n('+(q.client||'고객')+' · ₩'+won(q.total||0)+')', function(){
-      _quotes=_quotes.filter(function(x){ return x.id!==id; });
-      renderQuotes(); showToast('견적서를 삭제했습니다.');
+    confirmAction('이 견적서를 삭제할까요?\n('+(q.client||'고객')+' · ₩'+won(q.total||0)+')', async function(){
+      await dbDeleteQuote(id);
+      await loadQuotes(); showToast('견적서를 삭제했습니다.');
     });
   }
   function useQuoteForContract(id){ var q=_findQuote(id); if(!q) return; startContractFromQuote(q); }
@@ -1571,7 +1727,7 @@
   document.getElementById('stampRemove').addEventListener('click', function(){
     SUPPLIER.stamp = ''; document.getElementById('stampFile').value=''; renderStampPreview();
   });
-  function saveSettings(){
+  async function saveSettings(){
     SUPPLIER.name   = document.getElementById('setName').value.trim() || '조화닷컴';
     SUPPLIER.biz    = document.getElementById('setBiz').value.trim();
     SUPPLIER.ceo    = document.getElementById('setCeo').value.trim();
@@ -1581,6 +1737,10 @@
     SUPPLIER.email  = document.getElementById('setEmail').value.trim();
     SUPPLIER.addr   = document.getElementById('setAddr').value.trim();
     SUPPLIER.bank   = document.getElementById('setBank').value.trim();
+    if(typeof dbSaveSupplier === 'function'){
+      var ok = await dbSaveSupplier(SUPPLIER);
+      if(!ok) return;   // 저장 실패 시 화면 유지(alert는 dbSaveSupplier가 표시)
+    }
     showToast('✓ 회사 정보가 저장되어 모든 견적서에 자동 적용됩니다.');
     showView('home');
   }
@@ -1657,7 +1817,7 @@
               '<td class="r">'+(it.amt?won(it.amt):'')+'</td><td>'+esc(it.note||'')+'</td></tr>';
     });
 
-    var stampHd = S.stamp ? '<img class="stamp-hd" src="'+S.stamp+'" alt="직인">' : '<span class="stamp-hd-ph">직인</span>';
+    var signStamp = S.stamp ? '<img class="ct-sign-stamp" src="'+S.stamp+'" alt="직인">' : '';
     var vatRowHtml = a.vatApplied ? '<tr><td>부가세 (10%)</td><td>₩ '+won(a.vat)+'</td></tr>' : '';
     var amtLbl = (vatMode === 'add') ? '합계금액 (부가세 별도)' : (vatMode === 'incl') ? '합계금액 (부가세 포함)' : '합계금액';
 
@@ -1679,7 +1839,7 @@
 
     var supTable =
       '<table class="party-tbl">'+
-        '<tr><th class="party-head" colspan="4"><div class="ph-wrap"><span>공 급 자</span>'+stampHd+'</div></th></tr>'+
+        '<tr><th class="party-head" colspan="4">공 급 자</th></tr>'+
         '<tr><td class="lab">상호</td><td class="v">'+esc(S.name)+'</td><td class="lab">대표자</td><td class="v">'+val(S.ceo,"(대표자)")+'</td></tr>'+
         '<tr><td class="lab">등록번호</td><td class="v">'+val(S.biz,"(등록번호)")+'</td><td class="lab">전화</td><td class="v">'+val(S.tel,"(연락처)")+'</td></tr>'+
         '<tr><td class="lab">사업장 주소</td><td class="v" colspan="3">'+val(S.addr,"(사업장 주소)")+'</td></tr>'+
@@ -1707,7 +1867,7 @@
         '<tr class="grand"><td>합계금액</td><td>₩ '+won(a.total)+'</td></tr>'+
       '</table></div>'+
       '<div class="doc-notes">'+notesHtml+'</div>'+
-      '<div class="doc-foot">위와 같이 견적서를 제출합니다.<div class="sign">'+todayStr()+' &nbsp; <b>'+esc(S.name)+'</b> &nbsp;(인)</div></div>';
+      '<div class="doc-foot">위와 같이 견적서를 제출합니다.<div class="sign">'+todayStr()+' &nbsp; <b>'+esc(S.name)+'</b> &nbsp;(인) '+signStamp+'</div></div>';
   }
 
   function openDoc(){
@@ -1726,25 +1886,26 @@
     return ls.map(function(l){ return '· '+esc(l); }).join('<br>');
   }
 
-  function openContract(){
-    window._editingContractId = null; window._ctFormBack='home'; window._sourceQuoteId=null; window._ctSignature=''; setContractMode(false);
-    var name = (document.getElementById('custName').value||'').trim();
-    var tel  = (document.getElementById('custTel').value||'').trim();
-    var addr = (document.getElementById('custAddr').value||'').trim();
-    var work = firstLine(document.getElementById('custWork').value);
-    var a = getFinalAmounts(collectItems());
-    window._ctTotal = a.total; window._ctWork = work;
-    // 견적 고객정보 → 갑 정보 연동 (비어있을 때만 채워 수정 내용 보존)
-    if(!document.getElementById('ctcName').value) document.getElementById('ctcName').value = name;
-    if(!document.getElementById('ctcTel').value)  document.getElementById('ctcTel').value  = tel;
-    if(!document.getElementById('ctcAddr').value) document.getElementById('ctcAddr').value = addr;
-    document.getElementById('cSumWork').textContent = work || '(시공내용 첫 줄)';
-    setCtTotal(a.total);
-    if(!document.getElementById('ctDate').value) document.getElementById('ctDate').value = isoToday();
-    recalcBalance();
-    showView('contract');
-    setTimeout(setupSig, 30);
-    updateSigStatus();
+  async function openContract(){
+    if(confirmMode === 'manual' && !manualConfirmed){ showToast('수동 금액 입력 후 [확인]을 눌러주세요.'); return; }
+    var d = collectQuoteData();
+    if(!d.client && !(d.items && d.items.length) && !d.total){ showToast('견적 내용을 먼저 입력해 주세요.'); return; }
+    // 1) 견적을 먼저 DB에 저장(없으면 insert, 편집 중이면 update) → 새로고침해도 유지
+    var saved;
+    if(window._editingQuoteId){
+      await dbUpdateQuote(window._editingQuoteId, d);
+      await loadQuotes();
+      saved = _findQuote(window._editingQuoteId);
+    } else {
+      saved = await dbInsertQuote(d);
+      if(!saved) return;   // 저장 실패 시 중단(alert는 dbInsertQuote가 표시)
+      await loadQuotes();
+      saved = _findQuote(saved.id) || saved;
+    }
+    window._editingQuoteId = null;
+    resetQuoteForm();
+    // 2) 저장된 견적 내용으로 계약서 작성(저장된 견적과 연결 · _sourceQuoteId 설정)
+    startContractFromQuote(saved);
   }
   function recalcBalance(){
     var total = window._ctTotal || 0;
@@ -1873,7 +2034,6 @@
     var terms=document.getElementById('ctTerms').value;
     var special=document.getElementById('ctSpecial').value;
     var method=document.getElementById('ctMethod') ? document.getElementById('ctMethod').value : '계좌이체';
-    var stampHd = S.stamp ? '<img class="stamp-hd" src="'+S.stamp+'" alt="직인">' : '<span class="stamp-hd-ph">직인</span>';
     var signStamp = S.stamp ? '<img class="ct-sign-stamp" src="'+S.stamp+'" alt="직인">' : '';
     var gapSign = window._ctSignature ? '<img class="ct-sign-img" src="'+window._ctSignature+'" alt="서명">' : '(서명)';
     var dateStr = ctDate ? isoToKor(ctDate) : todayStr();
@@ -1883,7 +2043,7 @@
       ['이메일', g.email],['주소', g.addr],['업태', g.uptae],['업종', g.upjong],
       ['담당자', g.mgr],['담당자 연락처', g.mgrTel]
     ]);
-    var eulTable = partyTable('시공자 (을)', stampHd, [
+    var eulTable = partyTable('시공자 (을)', '', [
       ['상호', S.name],['사업자등록번호', S.biz],['대표자', S.ceo],['연락처', S.tel],
       ['이메일', S.email],['주소', S.addr],['업태', S.uptae],['업종', S.upjong],
       ['담당자', reqMgr],['담당자 연락처', reqMgrTel]
@@ -1945,7 +2105,7 @@
       document.getElementById('dsClient').focus();
     }
   }
-  function addSaleDirect(){
+  async function addSaleDirect(){
     var client=(document.getElementById('dsClient').value||'').trim();
     var title=(document.getElementById('dsTitle').value||'').trim();
     var amount=parseInt((document.getElementById('dsAmount').value||'').replace(/[^0-9]/g,''),10)||0;
@@ -1955,17 +2115,19 @@
     var date=document.getElementById('dsDate').value||isoToday();
     if(!client && !title){ showToast('거래처 또는 내용을 입력해 주세요.'); return; }
     if(amount<=0){ showToast('금액을 입력해 주세요.'); return; }
-    _sales.unshift({ id:++_saleSeq, source:'direct', client:client||'(거래처)', title:title||'-', amount:amount, method:method, vatMode:vat, date:date, paid:(paidSel==='1'?amount:0), down:0, balance:amount, downPaid:false, balancePaid:false });
+    var saved=await dbInsertSale({ source:'direct', client:client||'(거래처)', title:title||'-', amount:amount, method:method, vatMode:vat, date:date, paid:(paidSel==='1'?amount:0), down:0, balance:amount });
+    if(!saved) return;
     document.getElementById('dsClient').value=''; document.getElementById('dsTitle').value=''; document.getElementById('dsAmount').value=''; document.getElementById('dsPaid').value='0'; document.getElementById('dsVat').value='add';
     document.getElementById('directForm').classList.add('hidden');
+    await loadSales();
     _refreshAll();
     showToast('✓ 매출을 추가했습니다.');
   }
 
   function markDown(id){ var s=_findSale(id); if(!s) return; s.downPaid=!s.downPaid; renderSales(); if(s.downPaid) showToast('✓ 계약금 입금 확인 · 경리에게 카톡 알림 (데모)'); }
   function markBalance(id){ var s=_findSale(id); if(!s) return; s.balancePaid=!s.balancePaid; renderSales(); if(s.balancePaid) showToast('✓ 잔금 입금 확인 · 경리에게 카톡 알림 (데모)'); }
-  function markDirectPaid(id){ var s=_findSale(id); if(!s) return; s.paid=(s.paid>=s.amount)?0:s.amount; renderSales(); if(s.paid>=s.amount && s.amount>0) showToast('✓ 입금 확인 · 경리에게 카톡 알림 (데모)'); }
-  function deleteSale(id){ confirmAction('이 매출 항목을 삭제할까요?', function(){ _sales=_sales.filter(function(s){return s.id!==id;}); _refreshAll(); }); }
+  function markDirectPaid(id){ var s=_findSale(id); if(!s) return; s.paid=(s.paid>=s.amount)?0:s.amount; persistSale(s); renderSales(); if(s.paid>=s.amount && s.amount>0) showToast('✓ 입금 확인 · 경리에게 카톡 알림 (데모)'); }
+  function deleteSale(id){ confirmAction('이 매출 항목을 삭제할까요?', async function(){ var ok=await dbDeleteSale(id); if(!ok) return; await loadSales(); _refreshAll(); }); }
   function deleteSaleFromModal(){ var id=window._editingSaleId; if(!id) return; closeSaleModal(); deleteSale(id); }
 
   function currentPeriod(){ var t=isoToday(); return {y:parseInt(t.slice(0,4),10), m:parseInt(t.slice(5,7),10)}; }
@@ -1995,19 +2157,20 @@
     if((s.paid||0) >= s.amount && s.amount>0){ showToast('완납 상태입니다. 잔금을 먼저 해제하세요.'); return; }
     if((s.paid||0) >= down){ if((s.paid||0)===down){ s.paid=0; showToast('계약금 입금 취소'); } else { showToast('부분 입금 상태예요. 미수금 관리에서 조정하세요.'); return; } }
     else { s.paid=down; showToast('✓ 계약금 입금 처리'); }
+    persistSale(s);
     _refreshAll();
   }
   function payBalance(id){
     var s=_findSale(id); if(!s) return;
-    if((s.paid||0) >= s.amount && s.amount>0){ s.paid=(s.down||0); showToast('잔금 입금 취소'); _refreshAll(); return; }
+    if((s.paid||0) >= s.amount && s.amount>0){ s.paid=(s.down||0); persistSale(s); showToast('잔금 입금 취소'); _refreshAll(); return; }
     if(s.source==='contract' && !s.completedDate){ showToast('⚠ 시공완료 처리 후 진행 바랍니다. (시공 관리에서 시공완료 입력)'); return; }
-    s.paid=s.amount; showToast('✓ 잔금 입금 · 완납 처리'); _refreshAll();
+    s.paid=s.amount; persistSale(s); showToast('✓ 잔금 입금 · 완납 처리'); _refreshAll();
   }
   function payFull(id){
     var s=_findSale(id); if(!s) return;
-    if((s.paid||0)>=s.amount && s.amount>0){ s.paid=0; showToast('미입금으로 되돌림'); _refreshAll(); return; }
+    if((s.paid||0)>=s.amount && s.amount>0){ s.paid=0; persistSale(s); showToast('미입금으로 되돌림'); _refreshAll(); return; }
     if(s.source==='contract' && !s.completedDate){ showToast('⚠ 시공완료 처리 후 진행 바랍니다. (시공 관리에서 시공완료 입력)'); return; }
-    s.paid=s.amount; showToast('✓ 입금 완료 처리'); _refreshAll();
+    s.paid=s.amount; persistSale(s); showToast('✓ 입금 완료 처리'); _refreshAll();
   }
 
   function renderSales(){
@@ -2069,6 +2232,13 @@
 
   /* ---------- 계약서 관리 ---------- */
   var _contracts = [], _ctSeq = 0;
+  // 공개 서명 링크용 추측불가 토큰(32 hex). 번호 순차 금지 — 랜덤.
+  function genSignToken(){
+    var a=new Uint8Array(16);
+    if(window.crypto && crypto.getRandomValues){ crypto.getRandomValues(a); }
+    else { for(var i=0;i<16;i++) a[i]=Math.floor(Math.random()*256); }
+    return Array.prototype.map.call(a,function(b){ return ('0'+b.toString(16)).slice(-2); }).join('');
+  }
   var DEFAULT_TERMS = (document.getElementById('ctTerms') ? document.getElementById('ctTerms').value : '');
 
   function _findContract(id){ for(var i=0;i<_contracts.length;i++){ if(_contracts[i].id===id) return _contracts[i]; } return null; }
@@ -2126,14 +2296,20 @@
     try{ clearSig(); }catch(e){}
     try{ setContractMode(false); }catch(e){}
   }
-  function newContract(){ resetContractForm(); openContract(); }
+  function newContract(){
+    resetContractForm();                 // 모든 필드 초기화 · 금액 0 · 서명 없음 · source 없음
+    window._ctFormBack='quotes';
+    showView('contract');
+    setTimeout(setupSig, 30);
+    updateSigStatus();
+  }
 
   function contractSmsText(c){
     var d=c.data||{};
-    var link='https://johwa.link/sign/'+c.id+'-'+(c.id*7+31);
-    return '안녕하세요, '+(d.name||'고객')+'님. '+(SUPPLIER.name||'조화닷컴')+'입니다.\n\n['+(d.title||'시공')+'] 공급 및 시공 계약서를 보내드립니다.\n· 계약금액 ₩'+won(d.amount||0)+'\n\n아래 링크에서 내용 확인 후 서명해 주세요.\n'+link+'\n\n서명이 완료되면 계약이 최종 확정됩니다. 감사합니다.';
+    var link='https://zh.zohwa.com/sign/'+(c.signToken || (c.id+'-'+(c.id*7+31)));
+    return '안녕하세요, '+(d.name||'고객')+'님. '+(SUPPLIER.name||'조화닷컴')+'입니다.^^\n\n['+(d.title||'시공')+'] 공급 및 시공 계약서를 보내드립니다.\n· 계약금액 ₩'+won(d.amount||0)+' 원\n\n아래 주소를 클릭하셔서 내용 확인 후 전자서명 부탁드립니다.\n'+link+'\n\n서명이 완료되면 계약이 최종 확정됩니다. 감사합니다.';
   }
-  function registerContract(){
+  async function registerContract(){
     var amount = window._ctTotal || getFinalAmounts(collectItems()).total;
     if(!amount || amount<=0){ showToast('계약 금액이 없습니다. 견적에서 금액을 확정해 주세요.'); return; }
     window._ctTotal = amount;
@@ -2145,34 +2321,39 @@
       var wasSigned = rec && rec.status==='signed';
       if(rec){
         rec.data=d;
-        if(wasSigned){
-          rec.status='sent'; rec.signedAt=null; rec.signEvidence=null; rec.data.signature='';
-          _sales=_sales.filter(function(s){ return s.contractId!==rec.id; });  // 서명 무효화 → 매출 회수
-        }
+        if(!rec.signToken) rec.signToken=genSignToken();
+        if(wasSigned){ rec.status='sent'; rec.signedAt=null; rec.signEvidence=null; rec.data.signature=''; }
         rec.sentAt=nowStamp();
+        var ok = await dbUpdateContract(rec.id, rec);
+        if(!ok) return;
+        if(wasSigned){ await dbDeleteSalesByContract(rec.id); _sales=_sales.filter(function(s){ return s.contractId!==rec.id; }); }  // 서명 무효화 → 매출 회수
         logSms({kind:'contract', client:d.name||'고객', phone:d.tel||d.mgrTel||'', text:contractSmsText(rec), refId:rec.id});
       }
       window._editingContractId=null; window._sourceQuoteId=null;
       resetContractForm();
+      await loadContracts();
+      await loadSales();
       window._contractsTab='sent'; _refreshAll();
       showToast(wasSigned ? '✓ 수정 저장 · 서명이 무효화되어 갑에게 재발송했습니다.' : '✓ 수정 저장 · 갑에게 재발송했습니다.');
       setContractsTab('sent'); showView('contracts');
     } else {
-      var id=++_ctSeq;
-      var rec2={ id:id, data:d, created:isoToday(), status:'sent', sentAt:nowStamp(), signedAt:null, signEvidence:null };
-      _contracts.unshift(rec2);
-      if(window._sourceQuoteId){ _quotes=_quotes.filter(function(x){ return x.id!==window._sourceQuoteId; }); window._sourceQuoteId=null; }
-      var sm=logSms({kind:'contract', client:d.name||'고객', phone:d.tel||d.mgrTel||'', text:contractSmsText(rec2), refId:id});
+      var rec2={ data:d, status:'sent', sentAt:nowStamp(), signedAt:null, signEvidence:null, signToken:genSignToken() };
+      var saved = await dbInsertContract(rec2);
+      if(!saved) return;   // 저장 실패 시 중단
+      if(window._sourceQuoteId){ await dbDeleteQuote(window._sourceQuoteId); window._sourceQuoteId=null; await loadQuotes(); }  // 견적→계약 전환: 원본 견적 제거
+      logSms({kind:'contract', client:d.name||'고객', phone:d.tel||d.mgrTel||'', text:contractSmsText(saved), refId:saved.id});
       resetContractForm();
+      await loadContracts();
       window._contractsTab='sent'; _refreshAll();
-      showToast('✓ 계약서 등록 · 갑에게 서명 요청 문자를 '+sm.whenLabel+'로 발송합니다.');
+      showToast('✓ 계약서 등록 · 갑에게 전자서명 요청 문자를 발송했습니다.');
       setContractsTab('sent'); showView('contracts');
     }
   }
-  function resendContractSms(id){
+  async function resendContractSms(id){
     var c=_findContract(id); if(!c) return; var d=c.data||{};
+    if(!c.signToken){ c.signToken=genSignToken(); await dbUpdateContract(c.id, c); }
     var sm=logSms({kind:'contract', client:d.name||'고객', phone:d.tel||d.mgrTel||'', text:contractSmsText(c), refId:id});
-    renderContracts(); showToast('✓ 서명 요청 문자를 '+sm.whenLabel+'로 재발송합니다.');
+    renderContracts(); showToast('✓ 전자서명 요청 문자를 재발송했습니다.');
   }
 
   function openContracts(){ var fm=document.getElementById('ctFilterMonth'); if(fm && !fm.value) fm.value=isoToday().slice(0,7); if(!window._contractsTab) window._contractsTab='sent'; setContractsTab(window._contractsTab); showView('contracts'); }
@@ -2187,9 +2368,12 @@
     showView('contract');
   }
   function deleteContract(id){
-    confirmAction('이 계약서를 해지·삭제할까요?\n연결된 정산 매출도 함께 삭제됩니다.', function(){
-      _contracts=_contracts.filter(function(x){return x.id!==id;});
+    confirmAction('이 계약서를 해지·삭제할까요?\n연결된 정산 매출도 함께 삭제됩니다.', async function(){
+      var ok = await dbDeleteContract(id); if(!ok) return;
+      await dbDeleteSalesByContract(id);
       _sales=_sales.filter(function(s){return s.contractId!==id;});
+      await loadContracts();
+      await loadSales();
       renderContracts(); if(typeof renderSales==='function') renderSales();
       showToast('계약서가 삭제되었습니다.');
     });
@@ -2203,10 +2387,13 @@
   }
   function deleteCurrentContract(){
     var id=window._editingContractId; if(!id) return;
-    confirmAction('이 계약서를 해지·삭제할까요?\n연결된 정산 매출도 함께 삭제됩니다.', function(){
-      _contracts=_contracts.filter(function(x){return x.id!==id;});
+    confirmAction('이 계약서를 해지·삭제할까요?\n연결된 정산 매출도 함께 삭제됩니다.', async function(){
+      var ok = await dbDeleteContract(id); if(!ok) return;
+      await dbDeleteSalesByContract(id);
       _sales=_sales.filter(function(s){return s.contractId!==id;});
       window._editingContractId=null; resetContractForm();
+      await loadContracts();
+      await loadSales();
       renderContracts(); _refreshAll();
       showView('contracts');
       showToast('계약서가 삭제되었습니다.');
@@ -2342,14 +2529,17 @@
       ip:'(서버 자동 기록 · 배포 시)', geo:null
     };
   }
-  function finalizeCsign(c, ev){
+  async function finalizeCsign(c, ev){
     c.data.signature=window._csignSignature;
     c.signEvidence=ev; c.status='signed'; c.signedAt=ev.signedAt;
+    await dbUpdateContract(c.id, c);   // 서명 상태·증거·서명이미지 DB 저장
     if(!_saleByContract(c.id)){
       var d=c.data;
-      _sales.unshift({ id:++_saleSeq, source:'contract', contractId:c.id, client:d.name||'고객', title:d.title||'시공', amount:d.amount, down:d.down, balance:d.amount-d.down, paid:0, completedDate:'', method:d.method||'계좌이체', vatMode:d.vatMode, date:d.date||isoToday() });
+      await dbInsertSale({ source:'contract', contractId:c.id, client:d.name||'고객', title:d.title||'시공', amount:d.amount, down:d.down, balance:(d.amount||0)-(d.down||0), paid:0, completedDate:'', start:(d.start||''), method:d.method||'계좌이체', vatMode:d.vatMode, date:d.date||isoToday() });
     }
     window._csignSignature=''; window._csignId=null;
+    await loadContracts();
+    await loadSales();
     window._contractsTab='signed'; _refreshAll();
     showToast('✓ 서명 완료 · 최종 계약서가 확정되었습니다. (법적 증거 수집 · 정산 매출 반영)');
     setContractsTab('signed'); showView('contracts');
@@ -2536,7 +2726,7 @@
       var d=daysSince(s.completedDate);
       [4,14,29].forEach(function(ms){
         if(d===ms && !dueAutoSent(s.id, ms)){
-          logSms({kind:'due', client:s.client||'고객', phone:resolveSalePhone(s), text:applyTmpl(s), milestone:ms, refId:s.id});
+          logSms({kind:'due', due:true, client:s.client||'고객', phone:resolveSalePhone(s), text:applyTmpl(s), milestone:ms, refId:s.id});
           fired++;
         }
       });
@@ -2592,7 +2782,7 @@
       });
       list.innerHTML=html;
     }
-    if(fired>0) showToast('자동 안내 문자 '+fired+'건이 오늘 14~16시 발송 예약되었습니다.');
+    if(fired>0) showToast('미수 자동 안내 문자 '+fired+'건을 당일 14:00 발송 예약했습니다.');
   }
   function renderDue30(list30){
     var box=document.getElementById('due30List');
@@ -2627,17 +2817,17 @@
     }
     if(sent===0){ showToast('발송할 고객을 선택해 주세요.'); return; }
     renderDueMgmt();
-    showToast('✓ '+sent+'명에게 안내 문자를 오늘 14~16시 발송 예약했습니다.');
+    showToast('✓ '+sent+'명에게 안내 문자를 발송했습니다.');
   }
   function setCompleted(id){
     var s=_findSale(id); if(!s) return;
     var today=isoToday();
-    confirmAction('시공완료일을 오늘('+today+')로 기록할까요?\n미수 경과일이 이 날짜부터 계산됩니다.', function(){ s.completedDate=today; _refreshAll(); showToast('✓ 시공완료 기록: '+today); }, '완료 기록');
+    confirmAction('시공완료일을 오늘('+today+')로 기록할까요?\n미수 경과일이 이 날짜부터 계산됩니다.', function(){ s.completedDate=today; persistSale(s); _refreshAll(); showToast('✓ 시공완료 기록: '+today); }, '완료 기록');
   }
   function markReceivablePaid(id){
     var s=_findSale(id); if(!s) return;
     if(s.source==='contract' && !s.completedDate){ showToast('⚠ 시공완료 처리 후 진행 바랍니다. (시공 관리에서 시공완료 입력)'); return; }
-    confirmAction('이 건을 완납(전액 입금)으로 처리할까요?', function(){ s.paid=s.amount; _refreshAll(); showToast('✓ 완납 처리 · 경리에게 카톡 알림 (데모)'); }, '완납 처리');
+    confirmAction('이 건을 완납(전액 입금)으로 처리할까요?', function(){ s.paid=s.amount; persistSale(s); _refreshAll(); showToast('✓ 완납 처리 · 경리에게 카톡 알림 (데모)'); }, '완납 처리');
   }
   function openPayModal(id){
     var s=_findSale(id); if(!s) return;
@@ -2654,7 +2844,7 @@
     var add=parseInt((document.getElementById('payAmount').value||'').replace(/[^0-9]/g,''),10)||0;
     if(add<=0){ showToast('입금액을 입력해 주세요.'); return; }
     var cur=salePaid(s); var np=cur+add; if(np>s.amount) np=s.amount;
-    s.paid=np; closePayModal(); _refreshAll();
+    s.paid=np; persistSale(s); closePayModal(); _refreshAll();
     var rem=s.amount-np;
     showToast(rem>0 ? ('입금 ₩'+won(add)+' 반영 · 남은 미수 ₩'+won(rem)) : '✓ 완납 처리되었습니다');
   }
@@ -2663,6 +2853,13 @@
   var _staff=[], _staffSeq=0;
   function _findStaff(id){ for(var i=0;i<_staff.length;i++){ if(_staff[i].id===id) return _staff[i]; } return null; }
   function openWork(){ renderWork(); showView('work'); }
+  // 직원 권한의 유일한 쓰기: [시공완료] → mark_work_complete RPC
+  function staffComplete(id){
+    confirmAction('이 시공 건을 [시공완료] 처리할까요?', async function(){
+      if(typeof completeWork==='function'){ await completeWork(id); }   // RPC + loadSales
+      renderWork(); showToast('✓ 시공완료 처리되었습니다.');
+    }, '시공완료');
+  }
   function workStatus(s){
     if(s.completedDate) return {k:'done', t:'시공완료'};
     var c=_findContract(s.contractId); var start=(c&&c.data)?c.data.start:'';
@@ -2704,6 +2901,7 @@
       list.innerHTML='<div class="sale-empty">'+(r?'해당 기간의 시공 건이 없습니다.':'시공 건이 없습니다.<br>계약서가 <b>서명 완료</b>되면 여기에 시공 건으로 표시됩니다.')+'</div>';
     } else {
       var html='';
+      var isStaff = (typeof CURRENT_ROLE!=='undefined' && CURRENT_ROLE==='staff');
       jobs.forEach(function(s){
         var st=workStatus(s);
         var c=_findContract(s.contractId);
@@ -2713,39 +2911,64 @@
         var wkTxt=workerArr(s).join(', ');
         var parts=[ (addr||'주소 미입력'), info, (wkTxt?('담당 '+wkTxt):'담당 미지정'), (s.title||'-') ];
         var detail=parts.join(' / ');
-        html += '<div class="row1 click" onclick="openWorkModal('+s.id+')">'+
-          '<span class="r-badge wk-'+st.k+'">'+st.t+'</span>'+
-          '<span class="r-name">'+esc(s.client||'-')+'</span>'+
-          '<span class="r-title">'+esc(detail)+'</span>'+
-        '</div>';
+        if(isStaff){
+          html += '<div class="row1">'+
+            '<span class="r-badge wk-'+st.k+'">'+st.t+'</span>'+
+            '<span class="r-name">'+esc(s.client||'-')+'</span>'+
+            '<span class="r-title">'+esc(detail)+'</span>'+
+            (s.completedDate?'':'<button class="r-act ok" onclick="staffComplete('+s.id+')">시공완료</button>')+
+          '</div>';
+        } else {
+          html += '<div class="row1 click" onclick="openWorkModal('+s.id+')">'+
+            '<span class="r-badge wk-'+st.k+'">'+st.t+'</span>'+
+            '<span class="r-name">'+esc(s.client||'-')+'</span>'+
+            '<span class="r-title">'+esc(detail)+'</span>'+
+          '</div>';
+        }
       });
       list.innerHTML=html;
     }
     renderStaff();
   }
   function renderStaff(){
-    var list=document.getElementById('staffList'); if(!list) return;
-    if(_staff.length===0){ list.innerHTML='<div class="sale-empty">등록된 직원·외주가 없습니다.<br><b>+ 직원 추가</b> 또는 <b>+ 외주 추가</b>로 등록하세요.</div>'; return; }
-    var html='';
+    var emp=document.getElementById('staffListEmp'), out=document.getElementById('staffListOut');
+    if(!emp || !out) return;
+    var canEdit = (typeof CURRENT_ROLE === 'undefined') || CURRENT_ROLE !== 'staff';
+    var ym=isoToday().slice(0,7);
+    var empH='', outH='', nEmp=0, nOut=0;
     _staff.forEach(function(p){
       var kind=p.kind||'직원';
-      html += '<div class="row1">'+
-        '<span class="r-kind '+(kind==='외주'?'out':'staff')+'">'+esc(kind)+'</span>'+
-        '<span class="r-name">'+esc(p.name||'-')+'</span>'+
-        '<span class="r-method">'+esc(p.role||'-')+'</span>'+
-        '<span class="r-title">'+esc(p.tel||'-')+'</span>'+
-        '<button class="r-act" onclick="openStaffModal('+p.id+')">수정</button>'+
-        '<button class="r-act" onclick="deleteStaff('+p.id+')">삭제</button>'+
-      '</div>';
+      if(kind==='외주'){
+        nOut++;
+        var days=outworkDaysInMonth(p.id, ym);
+        outH += '<div class="row1">'+
+          '<span class="r-name">'+esc(p.name||'-')+'</span>'+
+          '<span class="r-mday">이번 달 '+days+'일</span>'+
+          '<span class="r-title">'+esc(p.role||'')+(p.tel?(' · '+esc(p.tel)):'')+'</span>'+
+          (canEdit ? (
+          '<button class="r-act ok" onclick="openOutwork('+p.id+')">작업기록</button>'+
+          '<button class="r-act" onclick="openStaffModal('+p.id+')">수정</button>'+
+          '<button class="r-act" onclick="deleteStaff('+p.id+')">삭제</button>') : '')+
+        '</div>';
+      } else {
+        nEmp++;
+        empH += '<div class="row1">'+
+          '<span class="r-name">'+esc(p.name||'-')+'</span>'+
+          '<span class="r-title">'+esc(p.role||'-')+(p.tel?(' · '+esc(p.tel)):'')+'</span>'+
+          (canEdit ? (
+          '<button class="r-act" onclick="openStaffModal('+p.id+')">수정</button>'+
+          '<button class="r-act" onclick="deleteStaff('+p.id+')">삭제</button>') : '')+
+        '</div>';
+      }
     });
-    list.innerHTML=html;
+    emp.innerHTML = nEmp ? empH : '<div class="sale-empty" style="padding:18px 10px;">직원이 없습니다.<br><b>+ 직원 추가</b></div>';
+    out.innerHTML = nOut ? outH : '<div class="sale-empty" style="padding:18px 10px;">외주가 없습니다.<br><b>+ 외주 추가</b></div>';
   }
   function workerArr(s){ return Array.isArray(s.workers) ? s.workers.slice() : (s.worker ? s.worker.split(',').map(function(x){return x.trim();}).filter(Boolean) : []); }
   function collectWorkers(){
     var names=[];
     var cbs=document.querySelectorAll('#wkWorkerChecks input[type=checkbox]');
     for(var i=0;i<cbs.length;i++){ if(cbs[i].checked) names.push(cbs[i].value); }
-    (document.getElementById('wkWorkerExtra').value||'').split(/[,\n]/).forEach(function(x){ var n=x.trim(); if(n && names.indexOf(n)<0) names.push(n); });
     return names;
   }
   function openWorkModal(id){
@@ -2757,19 +2980,19 @@
     document.getElementById('wkStartDate').value=(c&&c.data&&c.data.start)?c.data.start:'';
     document.getElementById('wkCompDate').value=s.completedDate||isoToday();
     var cur=workerArr(s);
-    var staffNames=_staff.map(function(p){return p.name;});
     var box=document.getElementById('wkWorkerChecks');
-    if(_staff.length===0){ box.innerHTML='<div class="hint" style="padding:2px 0;">등록된 직원·외주가 없습니다. 아래 직접 입력을 사용하거나 직원·외주를 추가하세요.</div>'; }
+    var emp=_staff.filter(function(p){ return (p.kind||'직원')!=='외주'; });
+    var outs=_staff.filter(function(p){ return (p.kind||'직원')==='외주'; });
+    function chk(p){ var on=cur.indexOf(p.name)>=0; return '<label class="wk-chk'+(on?' on':'')+'"><input type="checkbox" value="'+esc(p.name)+'"'+(on?' checked':'')+' onchange="this.closest(\'.wk-chk\').classList.toggle(\'on\',this.checked)"> '+esc(p.name)+(p.role?(' · '+esc(p.role)):'')+'</label>'; }
+    if(_staff.length===0){ box.innerHTML='<div class="hint" style="padding:2px 0;">등록된 직원·외주가 없습니다. 시공 관리에서 직원·외주를 먼저 추가하세요.</div>'; }
     else {
       var h='';
-      _staff.forEach(function(p){
-        var on=cur.indexOf(p.name)>=0;
-        h+='<label class="wk-chk'+(on?' on':'')+'"><input type="checkbox" value="'+esc(p.name)+'"'+(on?' checked':'')+' onchange="this.closest(\'.wk-chk\').classList.toggle(\'on\',this.checked)"> '+esc(p.name)+' ('+esc(p.kind||'직원')+(p.role?(' · '+esc(p.role)):'')+')</label>';
-      });
+      h+='<div class="wk-grp-label">직원</div>';
+      h+= emp.length ? emp.map(chk).join('') : '<div class="hint" style="padding:2px 0 4px;">등록된 직원 없음</div>';
+      h+='<div class="wk-grp-label out">외주</div>';
+      h+= outs.length ? outs.map(chk).join('') : '<div class="hint" style="padding:2px 0;">등록된 외주 없음</div>';
       box.innerHTML=h;
     }
-    var extra=cur.filter(function(n){ return staffNames.indexOf(n)<0; });
-    document.getElementById('wkWorkerExtra').value=extra.join(', ');
     document.getElementById('workModal').classList.remove('hidden');
   }
   function closeWorkModal(){ document.getElementById('workModal').classList.add('hidden'); window._workSaleId=null; }
@@ -2777,26 +3000,84 @@
   function syncWorkStart(s){
     var c=_findContract(s.contractId);
     if(c&&c.data){ c.data.start=document.getElementById('wkStartDate').value||''; }
+    if(s){ s.start=document.getElementById('wkStartDate').value||''; }   // 매출 start_date 동기화
   }
-  function markWorkDone(){
+  function persistWork(s){
+    persistSale(s);
+    var c=_findContract(s.contractId);
+    if(c && typeof dbUpdateContract==='function') dbUpdateContract(c.id, c);   // 계약 data.start 변경 반영
+  }
+  // 완료된 모든 시공으로부터 '외주 자동 작업기록'을 시공별·외주별 1줄로 재구성.
+  // 일수 = 시공 시작일~종료일(양끝 포함). 시작/종료는 계약(data.start~data.end) 기준.
+  async function syncOutworkForSale(){
+    if(typeof dbInsertOutwork!=='function') return;
+    var AUTO='시공완료 자동 기록';
+    // 1) 있어야 할 자동기록 계산: key = saleId|staffId
+    var desired={};
+    _sales.forEach(function(s){
+      if(s.source!=='contract' || !s.completedDate) return;   // 시공완료된 건만
+      var c=_findContract(s.contractId);
+      var start=(c&&c.data&&c.data.start)?c.data.start:(s.start||s.completedDate);
+      var end=(c&&c.data&&c.data.end)?c.data.end:start;
+      var days=workDaySpan(start, end);
+      var title=((s.client?s.client+' ':'')+(s.title||'시공')).trim();
+      (s.workers||[]).forEach(function(nm){
+        var p=_staff.filter(function(x){ return (x.kind||'직원')==='외주' && x.name===nm; })[0];
+        if(!p) return;
+        desired[s.id+'|'+p.id]={ saleId:s.id, staffId:p.id, date:(start||s.completedDate), days:days, title:title };
+      });
+    });
+    // 2) 기존 자동기록과 대조(수동 기록은 건드리지 않음). 식별: note 의 #saleId + staffId
+    var autos=_outwork.filter(function(w){ return (w.note||'').indexOf(AUTO)===0; });
+    var seen={};
+    for(var i=0;i<autos.length;i++){
+      var w=autos[i];
+      var mm=(w.note||'').match(/#(\d+)/);
+      var sid=mm?parseInt(mm[1],10):null;
+      var key=(sid!=null)?(sid+'|'+w.staffId):null;
+      if(key && desired[key] && !seen[key]){
+        seen[key]=true;
+        var d=desired[key];
+        if(w.date!==d.date || Number(w.days)!==d.days || w.title!==d.title){
+          w.date=d.date; w.days=d.days; w.title=d.title; await dbUpdateOutwork(w.id, w);
+        }
+      } else {
+        await dbDeleteOutwork(w.id);   // 완료취소·미배정이거나 중복 → 삭제
+      }
+    }
+    // 3) 새로 필요한 자동기록 생성
+    for(var k in desired){
+      if(seen[k]) continue;
+      var dd=desired[k];
+      await dbInsertOutwork({ staffId:dd.staffId, date:dd.date, days:dd.days, title:dd.title, note:AUTO+' #'+dd.saleId });
+    }
+    if(typeof loadOutwork==='function'){ try{ await loadOutwork(); }catch(e){ console.error(e); } }
+  }
+  async function markWorkDone(){
     var s=_findSale(window._workSaleId); if(!s){ closeWorkModal(); return; }
     syncWorkStart(s);
     s.completedDate=document.getElementById('wkCompDate').value || isoToday();
     var ws=applyWorkers(s);
+    persistWork(s);
+    await syncOutworkForSale(s);
     closeWorkModal(); _refreshAll(); try{ renderCalendar(); }catch(e){}
     showToast('✓ 시공완료 처리 '+s.completedDate+(ws.length?(' · 담당 '+ws.join(', ')):''));
   }
-  function clearWorkComplete(){
+  async function clearWorkComplete(){
     var s=_findSale(window._workSaleId); if(!s){ closeWorkModal(); return; }
     syncWorkStart(s);
     s.completedDate=''; applyWorkers(s);
+    persistWork(s);
+    await syncOutworkForSale(s);   // 완료 취소 → 자동기록 삭제
     closeWorkModal(); _refreshAll(); try{ renderCalendar(); }catch(e){}
     showToast('시공완료를 취소했습니다.');
   }
-  function saveWork(){
+  async function saveWork(){
     var s=_findSale(window._workSaleId); if(!s){ closeWorkModal(); return; }
     syncWorkStart(s);
     var ws=applyWorkers(s);
+    persistWork(s);
+    await syncOutworkForSale(s);   // 이미 완료된 건이면 담당자 변경을 작업기록에 반영
     closeWorkModal(); _refreshAll(); try{ renderCalendar(); }catch(e){}
     showToast('저장되었습니다.'+(ws.length?(' (담당 '+ws.join(', ')+')'):''));
   }
@@ -2824,37 +3105,150 @@
     window._editingStaffId=id||null;
     var p=id?_findStaff(id):null;
     var k = p ? (p.kind||'직원') : (kind||'직원');
+    window._staffKind = k;
     document.getElementById('staffModalTitle').textContent = p ? (k+' 수정') : (k+' 추가');
-    document.getElementById('stKind2').value = k;
-    document.getElementById('stName2').value=p?(p.name||''):'';
+    var lab=document.getElementById('stNameLabel'); if(lab) lab.textContent = (k==='외주'?'업체명 / 이름':'이름');
+    var nm=document.getElementById('stName2'); nm.value=p?(p.name||''):''; nm.placeholder=(k==='외주'?'외주 업체명 또는 담당자명':'직원명');
     document.getElementById('stTel2').value=p?(p.tel||''):'';
     document.getElementById('stRole2').value=p?(p.role||''):'';
     document.getElementById('stDelBtn2').style.display=p?'':'none';
     document.getElementById('staffModal').classList.remove('hidden');
   }
   function closeStaffModal(){ document.getElementById('staffModal').classList.add('hidden'); window._editingStaffId=null; }
-  function saveStaff(){
+  async function saveStaff(){
     var name=(document.getElementById('stName2').value||'').trim();
-    var kind=document.getElementById('stKind2').value||'직원';
-    if(!name){ showToast((kind==='외주'?'외주 업체명':'직원 이름')+'을 입력해 주세요.'); return; }
+    var kind=window._staffKind||'직원';
+    if(!name){ showToast((kind==='외주'?'외주 업체명/이름':'직원 이름')+'을 입력해 주세요.'); return; }
     var tel=(document.getElementById('stTel2').value||'').trim();
     var role=(document.getElementById('stRole2').value||'').trim();
     if(window._editingStaffId){
       var p=_findStaff(window._editingStaffId);
-      if(p){ p.name=name; p.tel=tel; p.role=role; p.kind=kind; }
+      if(p){ p.name=name; p.tel=tel; p.role=role; p.kind=kind; await dbUpdateStaff(p.id, p); }
       showToast('✓ '+kind+' 정보가 수정되었습니다.');
     } else {
-      _staff.push({id:++_staffSeq, name:name, tel:tel, role:role, kind:kind});
+      var saved=await dbInsertStaff({name:name, tel:tel, role:role, kind:kind});
+      if(!saved) return;
       showToast('✓ '+kind+'(이)가 추가되었습니다.');
     }
     window._editingStaffId=null;
-    closeStaffModal(); renderStaff();
+    closeStaffModal();
+    if(typeof loadStaff==='function') await loadStaff();
+    renderStaff();
   }
   function deleteStaff(id){
     var p=_findStaff(id); if(!p) return;
-    confirmAction('이 '+(p.kind||'직원')+'(을)를 삭제할까요?\n('+(p.name||'')+')', function(){ _staff=_staff.filter(function(x){ return x.id!==id; }); renderStaff(); showToast('삭제했습니다.'); });
+    confirmAction('이 '+(p.kind||'직원')+'(을)를 삭제할까요?\n('+(p.name||'')+')'+((p.kind==='외주')?'\n외주 작업 기록도 함께 삭제됩니다.':''), async function(){
+      var ok=await dbDeleteStaff(id); if(!ok) return;
+      if(typeof loadStaff==='function') await loadStaff();
+      if(typeof loadOutwork==='function') await loadOutwork();
+      renderStaff(); showToast('삭제했습니다.');
+    });
   }
   function deleteStaffFromModal(){ var id=window._editingStaffId; closeStaffModal(); if(id) deleteStaff(id); }
+
+  /* ---------- 외주 작업 일지 ---------- */
+  var _outwork=[], _outworkSeq=0;
+  function _findOutwork(id){ for(var i=0;i<_outwork.length;i++){ if(_outwork[i].id===id) return _outwork[i]; } return null; }
+  function outworkDaysInMonth(staffId, ym){
+    var sum=0;
+    _outwork.forEach(function(w){ if(w.staffId===staffId && (w.date||'').slice(0,7)===ym){ sum += (w.days!=null?Number(w.days):1); } });
+    return sum;
+  }
+  function dayLabel(n){ n=Number(n)||0; return (Math.round(n*10)%10===0) ? String(Math.round(n)) : n.toFixed(1); }   // 4 / 0.5 / 1.5
+  // 시공 시작~종료 일수(양끝 포함, 최소 1)
+  function workDaySpan(start, end){
+    if(!start) return 1;
+    if(!end || end<start) return 1;
+    var a=new Date(start+'T00:00:00'), b=new Date(end+'T00:00:00');
+    if(isNaN(a.getTime())||isNaN(b.getTime())) return 1;
+    var d=Math.round((b-a)/86400000)+1;
+    return d>=1?d:1;
+  }
+  async function openOutwork(staffId){
+    var p=_findStaff(staffId); if(!p) return;
+    window._outworkStaff=staffId;
+    if(!window._outworkYM) window._outworkYM=isoToday().slice(0,7);
+    var mEl=document.getElementById('owMonth'); if(mEl) mEl.value=window._outworkYM;
+    if(typeof loadOutwork==='function'){ try{ await loadOutwork(); }catch(e){ console.error(e); } }
+    renderOutwork(); showView('outwork');
+  }
+  function changeOutworkMonth(){
+    var mEl=document.getElementById('owMonth'); window._outworkYM=(mEl&&mEl.value)||isoToday().slice(0,7); renderOutwork();
+  }
+  function renderOutwork(){
+    var p=_findStaff(window._outworkStaff); if(!p){ showView('work'); return; }
+    var ym=window._outworkYM||isoToday().slice(0,7);
+    document.getElementById('owName').textContent=(p.name||'외주')+' · 외주';
+    document.getElementById('owRole').textContent=(p.role||'')+(p.tel?(' · '+p.tel):'');
+    var lab=document.getElementById('owYmLabel'); if(lab) lab.textContent=ymKor(ym);
+    document.getElementById('owDays').textContent=dayLabel(outworkDaysInMonth(p.id, ym));
+    var items=_outwork.filter(function(w){ return w.staffId===p.id && (w.date||'').slice(0,7)===ym; });
+    items.sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+    var hint=document.getElementById('owListHint'); if(hint) hint.textContent='· '+ymKor(ym)+' · '+items.length+'건';
+    var list=document.getElementById('owList');
+    if(items.length===0){ list.innerHTML='<div class="sale-empty">해당 월 작업 기록이 없습니다.<br><b>+ 작업 추가</b>로 등록하세요.</div>'; return; }
+    var html='';
+    items.forEach(function(w){
+      html += '<div class="row1 click" onclick="openOutworkModal('+w.id+')">'+
+        '<span class="r-date">'+esc(w.date||'-')+'</span>'+
+        '<span class="r-mday">'+dayLabel(w.days)+'일</span>'+
+        '<span class="r-name">'+esc(w.title||'(현장)')+'</span>'+
+        '<span class="r-title">'+esc(w.note||'')+'</span>'+
+        '<button class="r-act" onclick="event.stopPropagation();openOutworkModal('+w.id+')">수정</button>'+
+        '<button class="r-act" onclick="event.stopPropagation();deleteOutwork('+w.id+')">삭제</button>'+
+      '</div>';
+    });
+    list.innerHTML=html;
+  }
+  function openOutworkModal(id){
+    window._editingOutworkId = id || null;
+    var w = id ? _findOutwork(id) : null;
+    var sel=document.getElementById('owStaff');
+    var outs=_staff.filter(function(p){ return (p.kind||'직원')==='외주'; });
+    sel.innerHTML = outs.map(function(p){ return '<option value="'+p.id+'">'+esc(p.name||'')+'</option>'; }).join('');
+    sel.value = w ? w.staffId : (window._outworkStaff||(outs[0]&&outs[0].id));
+    document.getElementById('outworkModalTitle').textContent = w ? '외주 작업 수정' : '외주 작업 추가';
+    document.getElementById('owDate').value = w ? (w.date||isoToday()) : (((window._outworkYM||isoToday().slice(0,7))===isoToday().slice(0,7)) ? isoToday() : (window._outworkYM+'-01'));
+    document.getElementById('owTitle').value = w ? (w.title||'') : '';
+    document.getElementById('owNote').value = w ? (w.note||'') : '';
+    var ds=document.getElementById('owDaysSel'); if(ds) ds.value = (w && w.days!=null) ? String(w.days) : '1';
+    document.getElementById('owDelBtn').style.display = w ? '' : 'none';
+    document.getElementById('outworkModal').classList.remove('hidden');
+  }
+  function closeOutworkModal(){ document.getElementById('outworkModal').classList.add('hidden'); window._editingOutworkId=null; }
+  async function saveOutwork(){
+    var staffId=parseInt(document.getElementById('owStaff').value,10);
+    var date=document.getElementById('owDate').value||'';
+    if(!staffId){ showToast('외주를 선택해 주세요.'); return; }
+    if(!date){ showToast('작업일을 선택해 주세요.'); return; }
+    var title=(document.getElementById('owTitle').value||'').trim();
+    var note=(document.getElementById('owNote').value||'').trim();
+    var days=parseFloat(document.getElementById('owDaysSel').value)||1;
+    if(window._editingOutworkId){
+      var w=_findOutwork(window._editingOutworkId);
+      if(w){ w.staffId=staffId; w.date=date; w.title=title; w.note=note; w.days=days; await dbUpdateOutwork(w.id, w); }
+      showToast('✓ 작업 기록이 수정되었습니다.');
+    } else {
+      var saved=await dbInsertOutwork({staffId:staffId, date:date, title:title, note:note, days:days});
+      if(!saved) return;
+      showToast('✓ 작업 기록이 추가되었습니다.');
+    }
+    window._editingOutworkId=null;
+    window._outworkStaff=staffId; window._outworkYM=date.slice(0,7);
+    var mEl=document.getElementById('owMonth'); if(mEl) mEl.value=window._outworkYM;
+    closeOutworkModal();
+    if(typeof loadOutwork==='function') await loadOutwork();
+    renderOutwork(); renderStaff();
+  }
+  function deleteOutwork(id){
+    var w=_findOutwork(id); if(!w) return;
+    confirmAction('이 작업 기록을 삭제할까요?\n('+(w.date||'')+' · '+(w.title||'')+')', async function(){
+      var ok=await dbDeleteOutwork(id); if(!ok) return;
+      if(typeof loadOutwork==='function') await loadOutwork();
+      renderOutwork(); renderStaff(); showToast('삭제했습니다.');
+    });
+  }
+  function deleteOutworkFromModal(){ var id=window._editingOutworkId; closeOutworkModal(); if(id) deleteOutwork(id); }
 
 
   /* ---------- 매출 추가·수정 모달 ---------- */
@@ -2873,7 +3267,7 @@
     document.getElementById('saleModal').classList.remove('hidden');
   }
   function closeSaleModal(){ document.getElementById('saleModal').classList.add('hidden'); window._editingSaleId=null; }
-  function saveSaleModal(){
+  async function saveSaleModal(){
     var name=(document.getElementById('smName').value||'').trim();
     var title=(document.getElementById('smTitle2').value||'').trim();
     var date=document.getElementById('smDate').value||isoToday();
@@ -2885,14 +3279,16 @@
     if(amount<=0){ showToast('금액을 입력해 주세요.'); return; }
     if(window._editingSaleId){
       var s=_findSale(window._editingSaleId);
-      if(s){ s.client=name||'(거래처)'; s.title=title||'-'; s.date=date; s.amount=amount; s.method=method; s.vatMode=vat; if(s.source!=='contract'){ s.paid=(paidSel==='1'?amount:0); s.balance=amount; } }
+      if(s){ s.client=name||'(거래처)'; s.title=title||'-'; s.date=date; s.amount=amount; s.method=method; s.vatMode=vat; if(s.source!=='contract'){ s.paid=(paidSel==='1'?amount:0); s.balance=amount; } persistSale(s); }
       showToast('✓ 매출이 수정되었습니다.');
     } else {
-      _sales.unshift({ id:++_saleSeq, source:'direct', client:name||'(거래처)', title:title||'-', amount:amount, method:method, vatMode:vat, date:date, paid:(paidSel==='1'?amount:0), down:0, balance:amount, downPaid:false, balancePaid:false });
+      var saved=await dbInsertSale({ source:'direct', client:name||'(거래처)', title:title||'-', amount:amount, method:method, vatMode:vat, date:date, paid:(paidSel==='1'?amount:0), down:0, balance:amount });
+      if(!saved){ return; }
       showToast('✓ 매출이 추가되었습니다.');
     }
     window._editingSaleId=null;
     closeSaleModal();
+    await loadSales();
     _refreshAll();
   }
 
@@ -2914,7 +3310,7 @@
     var txt=applyTmpl(s);
     logSms({kind:'due', client:s.client||'고객', phone:resolveSalePhone(s), text:txt, refId:id});
     try{ renderDueMgmt(); }catch(e){}
-    showSms('미수금 안내 문자 · '+(s.client||'고객')+' · 당일 14~16시 발송 예약', txt);
+    showSms('미수금 안내 문자 · '+(s.client||'고객')+' · 즉시 발송', txt);
   }
   var DEFAULT_SMS_TMPL = '안녕하세요, {client}님. {company}입니다.\n\n[{title}] 건의 미수 금액 ₩{amount}이 입금 대기 중입니다.\n확인 후 입금 부탁드립니다. 감사합니다.\n입금계좌: {bank}';
   window._smsTemplate = DEFAULT_SMS_TMPL;
@@ -2935,23 +3331,36 @@
   var _sentSms=[], _smsSeq=0;
   function nowStamp(){ var d=new Date(); return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+' '+pad2(d.getHours())+':'+pad2(d.getMinutes()); }
   function ymdOf(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
-  // 고객 안내 문자는 당일 14~16시 발송(예약). immediate=true면 지금 발송(시공 담당자 통보 등).
-  function sendWindow(immediate){
+  // 미수금 자동 안내 문자(due:true)만 당일 14:00 예약, 그 외는 즉시 발송.
+  function sendWindow(opt){
     var d=new Date();
-    if(immediate){ return {when:nowStamp(), label:nowStamp()+' 발송', status:'발송완료'}; }
-    var day=d;
-    if(d.getHours()>=16){ day=new Date(d.getTime()+86400000); }   // 16시 지나면 익일 예약
-    var ymd=ymdOf(day);
-    return {when:ymd+' 14:00', label:ymd+' 14~16시 예약', status:'예약'};
+    // 미수금 자동 안내 문자만 해당 고객에게 '설정된 날 14:00' 발송 예약
+    if(opt && opt.due){
+      var ymd=ymdOf(opt.day ? new Date(opt.day) : d);
+      return {when:ymd+' 14:00', label:ymd+' 14:00 발송 예약', status:'예약'};
+    }
+    // 그 외(견적·계약·시공 담당자·30일↑ 직접·개별 안내)는 즉시 발송
+    return {when:nowStamp(), label:nowStamp()+' 발송', status:'발송완료'};
   }
   function logSms(opt){
-    var w=sendWindow(opt.immediate);
+    var w=sendWindow({ due: !!opt.due, day: opt.day });
     var e={ id:++_smsSeq, kind:opt.kind||'due', client:opt.client||'', phone:opt.phone||'',
             text:opt.text||'', when:w.when, whenLabel:w.label, status:w.status,
             milestone:(opt.milestone!=null?opt.milestone:null), refId:(opt.refId!=null?opt.refId:null),
             createdAt:nowStamp() };
     _sentSms.unshift(e);
+    if(typeof dbInsertSms === 'function') dbInsertSms(e);   // DB에도 기록(비동기) → 새로고침해도 유지
+    // 즉시 발송 건(발송완료)만 솔라피로 실제 전송. 예약(미수 자동 안내 14:00)은 기록만 → pg_cron이 추후 처리.
+    if(w.status==='발송완료' && e.phone){ realSendSms(e.phone, e.text, e.client); }
     return e;
+  }
+  // 솔라피 실제 발송 — 비밀키는 브라우저 금지. Supabase Edge Function 'send-sms'가 대신 호출.
+  async function realSendSms(phone, text, who){
+    try{
+      var r = await db.functions.invoke('send-sms', { body:{ to:phone, text:text } });
+      if(r.error){ console.error('문자 발송 실패:', r.error.message||r.error); showToast('⚠ 문자 발송 실패 ('+(who||phone)+') — 콘솔 확인'); return; }
+      if(r.data && r.data.ok===false){ console.error('솔라피 응답 오류:', r.data); showToast('⚠ 문자 발송 거부됨 ('+(who||phone)+') — 발신번호/잔액 확인'); }
+    }catch(err){ console.error('문자 발송 예외:', err); showToast('⚠ 문자 발송 오류 ('+(who||phone)+')'); }
   }
   function resolveSalePhone(s){
     if(!s) return '';
@@ -3061,7 +3470,6 @@
   var _schedules=[], _schedSeq=0;
   function _findSched(id){ for(var i=0;i<_schedules.length;i++){ if(_schedules[i].id===id) return _schedules[i]; } return null; }
   function ensureCalYM(){ if(!window._calYM){ var d=new Date(); window._calYM={y:d.getFullYear(), m:d.getMonth()+1}; } }
-  function openSchedule(){ ensureCalYM(); renderCalendar(); showView('schedule'); }
   function calShift(delta){ ensureCalYM(); var y=window._calYM.y, m=window._calYM.m+delta; while(m<1){m+=12;y--;} while(m>12){m-=12;y++;} window._calYM={y:y,m:m}; renderCalendar(); }
   function calToday(){ var d=new Date(); window._calYM={y:d.getFullYear(), m:d.getMonth()+1}; renderCalendar(); }
   function calJobDate(s){
@@ -3093,14 +3501,17 @@
       var shownJobs=jobEntries.slice(0,3);
       shownJobs.forEach(function(s){
         var done=!!s.completedDate;
-        var lab=(s.client||'시공')+(s.title?(' · '+s.title):'');
-        chips+='<div class="cal-chip job'+(done?' done':'')+'" onclick="event.stopPropagation();openWorkModal('+s.id+')" title="'+esc('[시공] '+(s.client||'')+' / '+(s.title||''))+'">'+esc(lab)+'</div>';
+        var cc=_findContract(s.contractId); var addr=(cc&&cc.data)?(cc.data.addr||''):'';
+        var full=(s.title||'시공')+(addr?(' '+addr):'');
+        var lab = full.length>14 ? (full.slice(0,13)+'…') : full;
+        chips+='<div class="cal-chip job'+(done?' done':'')+'" onclick="event.stopPropagation();openWorkModal('+s.id+')" title="'+esc('[시공] '+(s.title||'')+(addr?(' / '+addr):''))+'">'+esc(lab)+'</div>';
       });
       var room=3-shownJobs.length;
       var shownMemos = room>0 ? memoEntries.slice(0,room) : [];
       shownMemos.forEach(function(e){
-        var lab=(e.title||'(작업)')+(e.count?(' '+e.count+'명'):'');
-        chips+='<div class="cal-chip" onclick="event.stopPropagation();openSchedEntry(\''+iso+'\','+e.id+')" title="'+esc((e.title||'')+(e.worker?(' / '+e.worker):''))+'">'+esc(lab)+'</div>';
+        var raw=(e.memo||'(메모)');
+        var lab = raw.length>14 ? (raw.slice(0,13)+'…') : raw;
+        chips+='<div class="cal-chip" onclick="event.stopPropagation();openSchedEntry(\''+iso+'\','+e.id+')" title="'+esc(e.memo||'')+'">'+esc(lab)+'</div>';
       });
       var extra=(jobEntries.length-shownJobs.length)+(memoEntries.length-shownMemos.length);
       if(extra>0) chips+='<div class="cal-more">+'+extra+'건 더</div>';
@@ -3109,48 +3520,44 @@
     }
     document.getElementById('calGrid').innerHTML='<div class="cal-head">'+head+'</div><div class="cal-body">'+cells+'</div>';
   }
+  async function openSchedule(){ ensureCalYM(); if(typeof loadSchedules==='function'){ try{ await loadSchedules(); }catch(e){ console.error(e); } } renderCalendar(); showView('schedule'); }
   function openSchedEntry(dateStr, id){
     window._editingSchedId = id || null;
     var e = id ? _findSched(id) : null;
-    document.getElementById('schedModalTitle').textContent = e ? '일정 수정' : '일정 추가';
+    document.getElementById('schedModalTitle').textContent = e ? '메모 수정' : '메모 추가';
     document.getElementById('schDate').value = e ? (e.date||dateStr) : (dateStr||isoToday());
-    document.getElementById('schTitle').value = e ? (e.title||'') : '';
-    document.getElementById('schWorker').value = e ? (e.worker||'') : '';
-    document.getElementById('schCount').value = (e && e.count) ? e.count : '';
     document.getElementById('schMemo').value = e ? (e.memo||'') : '';
-    var dl=document.getElementById('schStaffList'); if(dl){ var o=''; _staff.forEach(function(p){ o+='<option value="'+esc(p.name)+'">'; }); dl.innerHTML=o; }
     document.getElementById('schDelBtn').style.display = e ? '' : 'none';
     document.getElementById('schedModal').classList.remove('hidden');
   }
   function closeSchedModal(){ document.getElementById('schedModal').classList.add('hidden'); window._editingSchedId=null; }
-  function saveSchedEntry(){
+  async function saveSchedEntry(){
     var date=document.getElementById('schDate').value;
     if(!date){ showToast('날짜를 선택해 주세요.'); return; }
-    var title=(document.getElementById('schTitle').value||'').trim();
-    var worker=(document.getElementById('schWorker').value||'').trim();
-    var count=parseInt((document.getElementById('schCount').value||'').replace(/[^0-9]/g,''),10)||0;
     var memo=(document.getElementById('schMemo').value||'').trim();
-    if(!title && !worker && !memo){ showToast('작업 내용·담당자·메모 중 하나는 입력해 주세요.'); return; }
+    if(!memo){ showToast('메모를 입력해 주세요.'); return; }
     if(window._editingSchedId){
       var e=_findSched(window._editingSchedId);
-      if(e){ e.date=date; e.title=title; e.worker=worker; e.count=count; e.memo=memo; }
-      showToast('✓ 일정이 수정되었습니다.');
+      if(e){ e.date=date; e.memo=memo; await dbUpdateSchedule(e.id, e); }
+      showToast('✓ 메모가 수정되었습니다.');
     } else {
-      _schedules.push({id:++_schedSeq, date:date, title:title, worker:worker, count:count, memo:memo});
-      showToast('✓ 일정이 추가되었습니다 · '+date);
+      var saved=await dbInsertSchedule({date:date, memo:memo, title:'', worker:'', count:0});
+      if(!saved) return;
+      showToast('✓ 메모가 추가되었습니다 · '+date);
     }
     window._editingSchedId=null;
     closeSchedModal();
+    if(typeof loadSchedules==='function'){ try{ await loadSchedules(); }catch(e){ console.error(e); } }
     if(date.slice(0,7)!==(window._calYM.y+'-'+pad2(window._calYM.m))){ var p=date.split('-'); window._calYM={y:parseInt(p[0],10), m:parseInt(p[1],10)}; }
     renderCalendar();
   }
   function deleteSchedEntry(){
     var id=window._editingSchedId; if(!id){ closeSchedModal(); return; }
-    confirmAction('이 일정을 삭제할까요?', function(){ _schedules=_schedules.filter(function(x){return x.id!==id;}); window._editingSchedId=null; closeSchedModal(); renderCalendar(); showToast('일정을 삭제했습니다.'); });
+    confirmAction('이 메모를 삭제할까요?', async function(){ var ok=await dbDeleteSchedule(id); if(!ok) return; window._editingSchedId=null; closeSchedModal(); if(typeof loadSchedules==='function'){ try{ await loadSchedules(); }catch(e){ console.error(e); } } renderCalendar(); showToast('메모를 삭제했습니다.'); });
   }
 
   function showView(v){
-    ['home','quote','quotes','settings','doc','contract','contractdoc','settle','contracts','salesmgmt','duemgmt','report','work','schedule','csign','evidence','smslog'].forEach(function(name){
+    ['home','quote','quotes','settings','doc','contract','contractdoc','settle','contracts','salesmgmt','duemgmt','report','work','schedule','outwork','csign','evidence','smslog'].forEach(function(name){
       document.getElementById(name+'View').classList.toggle('hidden', v !== name);
     });
     window.scrollTo({top:0, behavior:'smooth'});
@@ -3166,6 +3573,446 @@
   /* ---------- 시작 ---------- */
   addRow(); addRow(); addRow();
   updateSaveUI();
+  var _lu = document.getElementById('loginUser'); if(_lu) _lu.focus();
+</script>
+<script>
+// =========================================================
+// 조화닷컴 ERP — Supabase 연결 스타터 (Phase 3)
+// 단일 HTML 유지. 먼저 <head> 에 추가:
+//   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>
+// 그다음 이 코드를 기존 <script> 맨 위에 붙여넣고 URL/KEY 만 채우세요.
+// =========================================================
+
+const SUPABASE_URL  = 'https://mattdctnuctulfajxuih.supabase.co';   // zohwa-erp (Seoul)
+const SUPABASE_ANON = 'sb_publishable_w47BgfYEE-JckMrw1bRJVw_dPIGtjx6';   // anon public key (공개 OK · 보호는 RLS)
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+let CURRENT_ROLE = null;   // 'ceo' | 'manager' | 'staff' — 로그인 후 채워짐
+let LAST_LOGIN_ERR = '';   // 로그인 화면에 표시할 마지막 오류 메시지
+
+// ---------- 로그인 (아이디 + 비밀번호) ----------
+// "아이디"를 내부 이메일(아이디@zohwa.com)로 매핑해 Auth 사용.
+async function login(username, password){
+  LAST_LOGIN_ERR = '';
+  const email = `${username}@zohwa.com`;
+  const { error } = await db.auth.signInWithPassword({ email, password });
+  if (error){ LAST_LOGIN_ERR = error.message; return false; }
+  CURRENT_ROLE = (await db.rpc('my_role')).data || 'staff';
+  applyRoleGating();
+  return true;
+}
+async function logout(){ await db.auth.signOut(); location.reload(); }
+
+// ---------- 로그인 화면 처리 ----------
+async function doLogin(){
+  const u = (document.getElementById('loginUser').value || '').trim();
+  const p = document.getElementById('loginPass').value || '';
+  const errEl = document.getElementById('loginErr');
+  errEl.textContent = '';
+  if (!u || !p){ errEl.textContent = '아이디와 비밀번호를 입력하세요.'; return; }
+  if (SUPABASE_ANON === 'YOUR-ANON-KEY'){
+    errEl.textContent = '연결 키(anon key)가 아직 설정되지 않았습니다. (코드 상단 SUPABASE_ANON)';
+    return;
+  }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = '로그인 중…';
+  const ok = await login(u, p);
+  btn.disabled = false; btn.textContent = '로그인';
+  if (ok){
+    document.body.classList.remove('pre-auth');
+    document.getElementById('loginPass').value = '';
+    await loadAfterAuth();
+    showView('home');
+  } else {
+    errEl.textContent = LAST_LOGIN_ERR
+      ? ('로그인 실패: 아이디·비밀번호를 확인하세요.')
+      : '로그인 실패: 다시 시도해 주세요.';
+  }
+}
+
+// ---------- 역할별 화면 게이팅 (UI 1차 차단 · 진짜 차단은 RLS) ----------
+function applyRoleGating(){
+  const isStaff = CURRENT_ROLE === 'staff';
+  // 직원: 시공 관리 카드만 노출. 견적·계약·정산 카드 + 설정 기어 숨김.
+  ['cardQuote','cardContract','cardSettle','gearSettings','navQuote','navContract','navSettle'].forEach(id=>{
+    const el = document.getElementById(id);
+    if (el) el.style.display = isStaff ? 'none' : '';
+  });
+  // 헤더 역할 칩 표시
+  const chip = document.getElementById('roleChip');
+  if (chip){
+    chip.textContent = CURRENT_ROLE === 'ceo' ? '대표'
+                     : CURRENT_ROLE === 'manager' ? '매니저'
+                     : '직원';
+  }
+  // 홈 안내 문구도 직원용으로
+  const homeLead = document.querySelector('#homeView .page-head p');
+  if (homeLead) homeLead.textContent = isStaff ? '담당 시공 건을 확인하고 시공완료를 입력하세요.' : '처리할 업무를 선택하세요.';
+  // 직원: 직원·외주 추가 버튼 숨김 (직원은 조회만)
+  document.querySelectorAll('.staff-admin-only').forEach(el=>{ el.style.display = isStaff ? 'none' : ''; });
+  // 직원: 시공현황 행의 [시공완료] 외 편집/직원관리 버튼은 renderWork/renderStaff 안에서
+  //       if(CURRENT_ROLE==='staff') 로 숨김 처리.
+  if (typeof renderWork === 'function' && !document.getElementById('workView').classList.contains('hidden')) renderWork();
+}
+
+// ---------- 계정 관리 (CEO·매니저 전용) ----------
+// 새 계정 '생성'은 Supabase 대시보드(Authentication > Users, Auto Confirm 체크)
+//   또는 추후 admin Edge Function 으로. (클라이언트 signUp 은 현재 세션을 바꿔버려 부적합)
+// 생성된 사용자의 '역할 변경'은 앱에서 가능(RLS 허용):
+async function setUserRole(profileId, role){   // role: 'manager' | 'staff'
+  const { error } = await db.from('profiles').update({ role }).eq('id', profileId);
+  if (error) alert('역할 변경 실패: ' + error.message);
+}
+async function listUsers(){
+  const { data } = await db.from('profiles').select('id,username,name,role').order('username');
+  return data || [];
+}
+
+// =========================================================
+// 데이터 어댑터 — 메모리 배열 CRUD 를 DB 호출로 치환 (견적 예시)
+// 핵심: 앱은 camelCase, DB는 snake_case 라 다른 필드만 매핑.
+// 다른 모듈(contracts/sales/staff/outwork/schedules/sent_sms)도 이 패턴 복제.
+// =========================================================
+function quoteToDb(q){
+  return { client:q.client, tel:q.tel, addr:q.addr, work:q.work, mgr:q.mgr,
+    mgr_tel:q.mgrTel, cond:q.cond, items:q.items, total:q.total,
+    vat_mode:q.vatMode, confirm_mode:q.confirmMode,
+    manual_confirmed:q.manualConfirmed, manual_amount:q.manualAmount };
+}
+function quoteFromDb(r){
+  return { id:r.id, client:r.client, tel:r.tel, addr:r.addr, work:r.work, mgr:r.mgr,
+    mgrTel:r.mgr_tel, cond:r.cond, items:r.items, total:r.total,
+    vatMode:r.vat_mode, confirmMode:r.confirm_mode,
+    manualConfirmed:r.manual_confirmed, manualAmount:r.manual_amount, created:(r.created_at||'').slice(0,10) };
+}
+
+// 화면 진입 시 1회 호출 → 기존 메모리 배열 채우고 기존 렌더 재사용
+async function loadQuotes(){
+  const { data, error } = await db.from('quotes').select('*').order('id', { ascending:false });
+  if (error){ console.error(error); alert('견적 불러오기 실패: ' + error.message); return; }
+  _quotes = data.map(quoteFromDb);
+  renderQuotes?.();
+}
+// 기존 saveQuote 의 `_quotes.push(...)` 자리를 이걸로 교체 (반환 data.id = DB 부여 id)
+async function dbInsertQuote(q){
+  const { data, error } = await db.from('quotes').insert(quoteToDb(q)).select().single();
+  if (error){ alert('저장 실패: ' + error.message); return null; }
+  return quoteFromDb(data);
+}
+async function dbUpdateQuote(id, patch){
+  const { error } = await db.from('quotes').update(quoteToDb(patch)).eq('id', id);
+  if (error) alert('수정 실패: ' + error.message);
+}
+async function dbDeleteQuote(id){
+  const { error } = await db.from('quotes').delete().eq('id', id);
+  if (error) alert('삭제 실패: ' + error.message);
+}
+
+// ---------- 직원의 유일한 쓰기: [시공완료] ----------
+// 기존 `s.completed_date = ...` 처리 자리를 이 RPC 호출로 교체.
+async function completeWork(saleId){
+  const { error } = await db.rpc('mark_work_complete', { p_sale_id: saleId });
+  if (error) return alert('처리 실패: ' + error.message);
+  await loadSales?.();   // 목록·달력 갱신
+}
+
+// =========================================================
+// 회사 정보(supplier) — 단일 행. 조회는 CEO·매니저, 저장은 CEO 전용(RLS).
+// 앱 SUPPLIER 필드명이 컬럼명과 동일(name/biz/ceo/tel/uptae/upjong/email/addr/bank/stamp).
+// =========================================================
+let _supplierRowId = null;
+function supplierToDb(s){
+  return { name:s.name||'조화닷컴', biz:s.biz||null, ceo:s.ceo||null, tel:s.tel||null,
+    uptae:s.uptae||null, upjong:s.upjong||null, email:s.email||null, addr:s.addr||null,
+    bank:s.bank||null, stamp:s.stamp||null, updated_at:new Date().toISOString() };
+}
+async function loadSupplier(){
+  const { data, error } = await db.from('supplier').select('*').order('id').limit(1);
+  if (error){ console.error(error); return; }
+  if (data && data.length){
+    const r = data[0]; _supplierRowId = r.id;
+    SUPPLIER.name=r.name||'조화닷컴'; SUPPLIER.biz=r.biz||''; SUPPLIER.ceo=r.ceo||'';
+    SUPPLIER.tel=r.tel||''; SUPPLIER.uptae=r.uptae||''; SUPPLIER.upjong=r.upjong||'';
+    SUPPLIER.email=r.email||''; SUPPLIER.addr=r.addr||''; SUPPLIER.bank=r.bank||''; SUPPLIER.stamp=r.stamp||'';
+  }
+}
+async function dbSaveSupplier(s){
+  const payload = supplierToDb(s);
+  if (_supplierRowId){
+    const { error } = await db.from('supplier').update(payload).eq('id', _supplierRowId);
+    if (error){ alert('회사정보 저장 실패: ' + error.message); return false; }
+  } else {
+    const { data, error } = await db.from('supplier').insert(payload).select().single();
+    if (error){ alert('회사정보 저장 실패: ' + error.message); return false; }
+    _supplierRowId = data.id;
+  }
+  return true;
+}
+
+// =========================================================
+// 문자 발송 로그(sent_sms) — 조회/쓰기 CEO·매니저(RLS).
+// logSms()가 메모리에 즉시 표시 + 여기로 비동기 기록 → 새로고침해도 유지.
+//   _sentSms.text → body,  _sentSms.when → send_at,  refId → ref_id
+// =========================================================
+function smsToDb(e){
+  return { kind:e.kind, client:e.client||null, phone:e.phone||null,
+    body:e.text||null, send_at:e.when||null, when_label:e.whenLabel||null,
+    status:e.status||'발송완료', milestone:(e.milestone!=null?String(e.milestone):null),
+    ref_id:(e.refId!=null?e.refId:null) };
+}
+function smsFromDb(r){
+  return { id:r.id, kind:r.kind, client:r.client||'', phone:r.phone||'',
+    text:r.body||'', when:r.send_at||'', whenLabel:r.when_label||'',
+    status:r.status||'발송완료', milestone:r.milestone, refId:r.ref_id, createdAt:(r.created_at||'') };
+}
+async function loadSms(){
+  const { data, error } = await db.from('sent_sms').select('*').order('id', { ascending:false });
+  if (error){ console.error(error); return; }
+  if (typeof _sentSms !== 'undefined') _sentSms = (data||[]).map(smsFromDb);
+}
+async function dbInsertSms(e){
+  const { error } = await db.from('sent_sms').insert(smsToDb(e));
+  if (error) console.error('문자 기록 실패:', error.message);
+}
+
+// =========================================================
+// 계약(contracts) — data·sign_evidence 는 jsonb 그대로 저장/조회.
+// 조회/쓰기 CEO·매니저(RLS).  서명 완료 시 status='signed' + 증거 저장.
+// =========================================================
+function tsToStamp(v){            // timestamptz → 'YYYY-MM-DD HH:MM'
+  if(!v) return '';
+  var d = new Date(v); if(isNaN(d.getTime())) return (''+v);
+  var p = function(n){ return (''+n).padStart(2,'0'); };
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+function contractToDb(c){
+  return { data:c.data||{}, status:c.status||'sent',
+    sent_at:c.sentAt||null, signed_at:c.signedAt||null,
+    sign_evidence:c.signEvidence||null, sign_token:c.signToken||null };
+}
+function contractFromDb(r){
+  return { id:r.id, data:r.data||{}, status:r.status||'sent',
+    created:(r.created_at||'').slice(0,10),
+    sentAt:tsToStamp(r.sent_at), signedAt:tsToStamp(r.signed_at),
+    signEvidence:r.sign_evidence||null, signToken:r.sign_token||null };
+}
+async function loadContracts(){
+  const { data, error } = await db.from('contracts').select('*').order('id', { ascending:false });
+  if (error){ console.error(error); return; }
+  if (typeof _contracts !== 'undefined') _contracts = (data||[]).map(contractFromDb);
+}
+async function dbInsertContract(c){
+  const { data, error } = await db.from('contracts').insert(contractToDb(c)).select().single();
+  if (error){ alert('계약 저장 실패: ' + error.message); return null; }
+  return contractFromDb(data);
+}
+async function dbUpdateContract(id, c){
+  const { error } = await db.from('contracts').update(contractToDb(c)).eq('id', id);
+  if (error){ alert('계약 수정 실패: ' + error.message); return false; }
+  return true;
+}
+async function dbDeleteContract(id){
+  const { error } = await db.from('contracts').delete().eq('id', id);
+  if (error){ alert('계약 삭제 실패: ' + error.message); return false; }
+  return true;
+}
+
+// =========================================================
+// 매출/정산(sales) — 서명 시 생성, 직접매출, 입금, 시공완료/담당자.
+// 조회는 직원 포함 전체 / 추가·수정·삭제는 CEO·매니저(RLS).
+// (직원의 시공완료는 mark_work_complete RPC — 다음 단계)
+//   contractId↔contract_id, completedDate↔completed_date, date↔sale_date,
+//   vatMode↔vat_mode, start↔start_date(계약 data.start 동기화)
+// =========================================================
+function saleToDb(s){
+  return { source:s.source||'direct',
+    contract_id:(s.contractId!=null?s.contractId:null),
+    client:s.client||null, title:s.title||null,
+    amount:s.amount||0, down:s.down||0,
+    balance:(s.balance!=null?s.balance:null), paid:s.paid||0,
+    start_date:s.start||null, completed_date:s.completedDate||null,
+    worker:s.worker||null, workers:(Array.isArray(s.workers)?s.workers:[]),
+    method:s.method||null, vat_mode:s.vatMode||null, sale_date:s.date||null };
+}
+function saleFromDb(r){
+  return { id:r.id, source:r.source, contractId:r.contract_id,
+    client:r.client||'', title:r.title||'',
+    amount:Number(r.amount)||0, down:Number(r.down)||0,
+    balance:(r.balance!=null?Number(r.balance):0), paid:Number(r.paid)||0,
+    start:r.start_date||'', completedDate:r.completed_date||'',
+    worker:r.worker||'', workers:(Array.isArray(r.workers)?r.workers:[]),
+    method:r.method||'계좌이체', vatMode:r.vat_mode||'add', date:r.sale_date||'' };
+}
+async function loadSales(){
+  const { data, error } = await db.from('sales').select('*').order('id', { ascending:false });
+  if (error){ console.error(error); return; }
+  if (typeof _sales !== 'undefined') _sales = (data||[]).map(saleFromDb);
+}
+async function dbInsertSale(s){
+  const { data, error } = await db.from('sales').insert(saleToDb(s)).select().single();
+  if (error){ alert('매출 저장 실패: ' + error.message); return null; }
+  return saleFromDb(data);
+}
+async function dbUpdateSale(id, s){
+  const { error } = await db.from('sales').update(saleToDb(s)).eq('id', id);
+  if (error){ console.error('매출 갱신 실패:', error.message); return false; }
+  return true;
+}
+async function dbDeleteSale(id){
+  const { error } = await db.from('sales').delete().eq('id', id);
+  if (error){ alert('매출 삭제 실패: ' + error.message); return false; }
+  return true;
+}
+async function dbDeleteSalesByContract(cid){
+  const { error } = await db.from('sales').delete().eq('contract_id', cid);
+  if (error) console.error('연결 매출 삭제 실패:', error.message);
+}
+// 메모리 매출의 부분 변경(입금·완료·담당자 등)을 DB에 비동기 반영
+function persistSale(s){ if(typeof dbUpdateSale==='function' && s && s.id!=null) dbUpdateSale(s.id, s); }
+
+// =========================================================
+// 월별 시공 계획표 메모(schedules) — sched_date·memo. 조회 전체 / 쓰기 CEO·매니저.
+// =========================================================
+function schedToDb(e){ return { sched_date:e.date||null, title:e.title||null, worker:e.worker||null, count:e.count||0, memo:e.memo||null }; }
+function schedFromDb(r){ return { id:r.id, date:r.sched_date||'', title:r.title||'', worker:r.worker||'', count:r.count||0, memo:r.memo||'' }; }
+async function loadSchedules(){
+  const { data, error } = await db.from('schedules').select('*').order('id');
+  if (error){ console.error(error); return; }
+  if (typeof _schedules !== 'undefined') _schedules = (data||[]).map(schedFromDb);
+}
+async function dbInsertSchedule(e){
+  const { data, error } = await db.from('schedules').insert(schedToDb(e)).select().single();
+  if (error){ alert('메모 저장 실패: ' + error.message); return null; }
+  return schedFromDb(data);
+}
+async function dbUpdateSchedule(id, e){
+  const { error } = await db.from('schedules').update(schedToDb(e)).eq('id', id);
+  if (error){ alert('메모 수정 실패: ' + error.message); return false; }
+  return true;
+}
+async function dbDeleteSchedule(id){
+  const { error } = await db.from('schedules').delete().eq('id', id);
+  if (error){ alert('메모 삭제 실패: ' + error.message); return false; }
+  return true;
+}
+
+// =========================================================
+// 직원·외주(staff) — 조회 전체 / 쓰기 CEO·매니저.  role↔position.
+// =========================================================
+function staffToDb(p){ return { name:p.name||null, tel:p.tel||null, position:p.role||null, kind:p.kind||'직원' }; }
+function staffFromDb(r){ return { id:r.id, name:r.name||'', tel:r.tel||'', role:r.position||'', kind:r.kind||'직원' }; }
+async function loadStaff(){
+  const { data, error } = await db.from('staff').select('*').order('id');
+  if (error){ console.error(error); return; }
+  if (typeof _staff !== 'undefined') _staff = (data||[]).map(staffFromDb);
+}
+async function dbInsertStaff(p){
+  const { data, error } = await db.from('staff').insert(staffToDb(p)).select().single();
+  if (error){ alert('직원/외주 저장 실패: ' + error.message); return null; }
+  return staffFromDb(data);
+}
+async function dbUpdateStaff(id, p){
+  const { error } = await db.from('staff').update(staffToDb(p)).eq('id', id);
+  if (error){ alert('직원/외주 수정 실패: ' + error.message); return false; }
+  return true;
+}
+async function dbDeleteStaff(id){
+  const { error } = await db.from('staff').delete().eq('id', id);   // outwork 은 FK on delete cascade
+  if (error){ alert('직원/외주 삭제 실패: ' + error.message); return false; }
+  return true;
+}
+
+// =========================================================
+// 외주 작업 일지(outwork) — staff_id·work_date·title·note. 조회 전체 / 쓰기 CEO·매니저.
+//   시공완료 시 배정된 외주별로 자동 기록 생성 → 작업기록·총 작업일수에 반영.
+// =========================================================
+function outworkToDb(w){ return { staff_id:w.staffId, work_date:w.date||null, title:w.title||null, note:w.note||null, days:(w.days!=null?w.days:1) }; }
+function outworkFromDb(r){ return { id:r.id, staffId:r.staff_id, date:r.work_date||'', title:r.title||'', note:r.note||'', days:(r.days!=null?Number(r.days):1) }; }
+async function loadOutwork(){
+  const { data, error } = await db.from('outwork').select('*').order('id');
+  if (error){ console.error(error); return; }
+  if (typeof _outwork !== 'undefined') _outwork = (data||[]).map(outworkFromDb);
+}
+async function dbInsertOutwork(w){
+  const { data, error } = await db.from('outwork').insert(outworkToDb(w)).select().single();
+  if (error){ alert('작업기록 저장 실패: ' + error.message); return null; }
+  return outworkFromDb(data);
+}
+async function dbUpdateOutwork(id, w){
+  const { error } = await db.from('outwork').update(outworkToDb(w)).eq('id', id);
+  if (error){ console.error('작업기록 수정 실패:', error.message); return false; }
+  return true;
+}
+async function dbDeleteOutwork(id){
+  const { error } = await db.from('outwork').delete().eq('id', id);
+  if (error){ console.error('작업기록 삭제 실패:', error.message); return false; }
+  return true;
+}
+
+// =========================================================
+// 컬럼명 매핑 메모 (스키마에서 바뀐 이름):
+//   _sentSms.when → send_at,  _sentSms.text → body
+//   _sales.date   → sale_date, _schedules.date → sched_date
+//   _outwork.date → work_date, _staff.role → position
+//   _sales 에 start_date(시공예정일) 추가 — 계약 data.start 와 함께 저장.
+//   계약 data·signEvidence 는 jsonb 객체 그대로 저장/조회.
+// =========================================================
+
+// ---------- 로그인 후 DB에서 한 번 로딩(현재 DB 연결된 것: 견적·회사정보·문자) ----------
+async function loadAfterAuth(){
+  if (typeof loadSupplier  === 'function'){ try { await loadSupplier();  } catch(e){ console.error(e); } }
+  if (typeof loadSms       === 'function'){ try { await loadSms();       } catch(e){ console.error(e); } }
+  if (typeof loadQuotes    === 'function'){ try { await loadQuotes();    } catch(e){ console.error(e); } }
+  if (typeof loadContracts === 'function'){ try { await loadContracts(); } catch(e){ console.error(e); } }
+  if (typeof loadSales     === 'function'){ try { await loadSales();     } catch(e){ console.error(e); } }
+  if (typeof loadSchedules === 'function'){ try { await loadSchedules(); } catch(e){ console.error(e); } }
+  if (typeof loadStaff     === 'function'){ try { await loadStaff();     } catch(e){ console.error(e); } }
+  if (typeof loadOutwork   === 'function'){ try { await loadOutwork();   } catch(e){ console.error(e); } }
+  // 외부(공개 서명 페이지)에서 서명 완료된 계약은 매출이 아직 없을 수 있음 → 로드 시 자동 생성.
+  if (CURRENT_ROLE !== 'staff' && typeof reconcileSignedSales === 'function'){ try { await reconcileSignedSales(); } catch(e){ console.error(e); } }
+  // 외주 자동 작업기록 정리(같은 날 1줄로 합침). 쓰기 권한 있는 CEO·매니저만.
+  if (CURRENT_ROLE !== 'staff' && typeof syncOutworkForSale === 'function'){ try { await syncOutworkForSale(); } catch(e){ console.error(e); } }
+}
+
+// 서명 완료(공개 서명 포함)인데 매출이 없는 계약에 대해 매출 1건 생성. CEO·매니저만.
+async function reconcileSignedSales(){
+  if (CURRENT_ROLE === 'staff') return;
+  if (typeof _contracts === 'undefined' || typeof _saleByContract !== 'function' || typeof dbInsertSale !== 'function') return;
+  var made=0;
+  for (var i=0;i<_contracts.length;i++){
+    var c=_contracts[i];
+    if (c && c.status==='signed' && !_saleByContract(c.id)){
+      var d=c.data||{};
+      var ins=await dbInsertSale({ source:'contract', contractId:c.id, client:d.name||'고객', title:d.title||'시공',
+        amount:d.amount, down:d.down, balance:(d.amount||0)-(d.down||0), paid:0, completedDate:'',
+        start:(d.start||''), method:d.method||'계좌이체', vatMode:d.vatMode, date:d.date||isoToday() });
+      if(ins) made++;
+    }
+  }
+  if(made>0 && typeof loadSales==='function') await loadSales();
+}
+
+// ---------- 페이지 로드 시 세션 복구 (새로고침해도 로그인 유지) ----------
+// Supabase 세션은 localStorage 에 보관되어 새로고침해도 살아있다.
+// 기존 세션이 있으면 다시 로그인하지 않고 바로 업무 화면으로 진입.
+async function restoreSession(){
+  try {
+    if (SUPABASE_ANON === 'YOUR-ANON-KEY') return;   // 키 미설정 시 로그인 화면 유지
+    let data;
+    try { ({ data } = await db.auth.getSession()); }
+    catch(e){ console.error(e); return; }
+    if (!data || !data.session) return;              // 세션 없으면 로그인 화면 유지
+    CURRENT_ROLE = (await db.rpc('my_role')).data || 'staff';
+    applyRoleGating();
+    document.body.classList.remove('pre-auth');
+    await loadAfterAuth();
+    if (typeof showView === 'function') showView('home');
+  } finally {
+    document.body.classList.remove('auth-checking');  // 확인 끝 → 앱 또는 로그인 폼 노출
+  }
+}
+restoreSession();
+
 </script>
 </body>
 </html>
