@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>조화닷컴 · 전자 계약서 서명</title>
+<style>
+  :root{
+    --green:#2f6b4f; --green-deep:#234f3b; --green-soft:#eaf3ee;
+    --ink:#1d231f; --muted:#6b756d; --line:#dce4de; --line-soft:#eef2ef;
+    --bg:#f4f7f4; --surface:#ffffff; --warn:#c0492f;
+    --shadow:0 6px 24px rgba(35,79,59,.10);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; font-family:'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif; color:var(--ink);
+    background:radial-gradient(800px 420px at 100% -10%, rgba(47,107,79,.08), transparent 60%), var(--bg);
+    line-height:1.55; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:560px; margin:0 auto; padding:18px 16px 48px;}
+  .brand{display:flex; align-items:center; gap:10px; padding:6px 2px 16px;}
+  .brand .mark{width:34px; height:34px; border-radius:10px; background:var(--green); display:grid; place-items:center; box-shadow:0 4px 12px rgba(35,79,59,.30);}
+  .brand .name{font-size:17px; font-weight:800; letter-spacing:-.02em;}
+  .brand .sub{font-size:12px; color:var(--muted); margin-top:1px;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:22px 18px; margin-bottom:14px;}
+  h1{font-size:18px; font-weight:800; margin:0 0 4px;}
+  .lead{font-size:13px; color:var(--muted); margin:0 0 18px;}
+  label{display:block; font-size:12.5px; font-weight:650; color:var(--muted); margin:0 0 6px;}
+  input[type=tel],input[type=text]{width:100%; font-family:inherit; font-size:18px; letter-spacing:4px; text-align:center;
+    border:1px solid var(--line); border-radius:11px; padding:14px; background:#fff; color:var(--ink);}
+  input:focus{outline:none; border-color:var(--green); box-shadow:0 0 0 3px rgba(47,107,79,.12);}
+  .btn{width:100%; font-family:inherit; font-size:16px; font-weight:750; color:#fff; background:var(--green);
+    border:none; border-radius:12px; padding:15px; cursor:pointer; transition:background .15s, opacity .15s; margin-top:14px;}
+  .btn:hover{background:var(--green-deep);} .btn:disabled{opacity:.5; cursor:default;}
+  .btn.ghost{background:#fff; color:var(--muted); border:1px solid var(--line); margin-top:8px; font-weight:650; font-size:14px;}
+  .err{min-height:18px; margin-top:11px; font-size:13px; color:var(--warn); text-align:center; font-weight:600;}
+  .hidden{display:none !important;}
+  /* 계약 표시 */
+  .doc-h{font-size:16px; font-weight:800; text-align:center; padding-bottom:12px; border-bottom:2px solid var(--ink); margin-bottom:14px;}
+  .party{display:grid; grid-template-columns:64px 1fr; gap:4px 10px; font-size:13.5px; padding:10px 0;}
+  .party .k{color:var(--muted); font-weight:600;}
+  .sec-title{font-size:12px; font-weight:750; color:var(--green-deep); background:var(--green-soft); border-radius:8px; padding:6px 10px; margin:14px 0 8px;}
+  .amt-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0;}
+  .amt{background:var(--bg); border:1px solid var(--line-soft); border-radius:10px; padding:10px 12px;}
+  .amt .k{font-size:11.5px; color:var(--muted);} .amt .v{font-size:15px; font-weight:800; margin-top:2px;}
+  .amt.big{grid-column:1/3;} .amt.big .v{font-size:18px; color:var(--green-deep);}
+  .kv{font-size:13px; padding:3px 0;} .kv b{color:var(--muted); font-weight:600; margin-right:6px;}
+  .terms{font-size:12.5px; color:#3a423c; white-space:pre-wrap; background:var(--bg); border-radius:10px; padding:12px; margin-top:6px;}
+  /* 서명 패드 */
+  .pad-wrap{margin-top:8px;}
+  .pad{width:100%; height:200px; background:#fff; border:1.5px dashed var(--line); border-radius:12px; touch-action:none; display:block;}
+  .pad-row{display:flex; align-items:center; justify-content:space-between; margin-top:8px;}
+  .pad-status{font-size:13px; color:var(--muted);} .pad-status.on{color:var(--green-deep); font-weight:700;}
+  .clear{font-size:13px; color:var(--muted); background:#fff; border:1px solid var(--line); border-radius:8px; padding:7px 14px; cursor:pointer;}
+  .consent{display:flex; gap:9px; align-items:flex-start; margin-top:16px; font-size:13px; color:#3a423c;}
+  .consent input{width:18px; height:18px; margin-top:1px; accent-color:var(--green);}
+  .legal{font-size:11.5px; color:var(--muted); line-height:1.6; margin-top:14px; padding-top:13px; border-top:1px solid var(--line-soft);}
+  .ok-ico{width:62px; height:62px; border-radius:50%; background:var(--green-soft); display:grid; place-items:center; margin:6px auto 16px;}
+  .center{text-align:center;}
+  .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:s .7s linear infinite;margin:20px auto;}
+  @keyframes s{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <div class="mark"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 3-9 7-11 4 2 7 6 7 11a7 7 0 0 1-7 7Z"/><path d="M11 20v-9"/></svg></div>
+    <div><div class="name" id="brandName">조화닷컴</div><div class="sub">전자 계약서 서명</div></div>
+  </div>
+
+  <!-- 로딩 -->
+  <div id="loading" class="card center"><div class="spin"></div><div style="font-size:13px;color:var(--muted);">계약서를 불러오는 중…</div></div>
+
+  <!-- STEP 1: 본인확인 -->
+  <div id="step1" class="card hidden">
+    <h1>본인 확인</h1>
+    <p class="lead">계약서 확인 및 서명을 위해 <b>휴대폰 번호 뒤 4자리</b>를 입력해 주세요.</p>
+    <label>휴대폰 뒤 4자리</label>
+    <input id="last4" type="tel" inputmode="numeric" maxlength="4" placeholder="● ● ● ●" autocomplete="off">
+    <button id="verifyBtn" class="btn">계약서 확인하기</button>
+    <div id="err1" class="err"></div>
+  </div>
+
+  <!-- STEP 2: 계약 확인 + 서명 -->
+  <div id="step2" class="hidden">
+    <div class="card">
+      <div class="doc-h">공급 및 시공 계약서</div>
+      <div id="docBody"></div>
+    </div>
+    <div class="card">
+      <label>전자 서명 <span style="color:var(--muted);font-weight:500;">· 아래 칸에 손가락(또는 마우스)으로 서명해 주세요</span></label>
+      <div class="pad-wrap">
+        <canvas id="pad" class="pad"></canvas>
+        <div class="pad-row">
+          <span id="padStatus" class="pad-status">미서명</span>
+          <button class="clear" id="clearBtn">지우기</button>
+        </div>
+      </div>
+      <label class="consent"><input type="checkbox" id="agree"><span>위 계약 내용을 확인하였으며, 전자서명으로 계약을 체결하는 데 동의합니다. (전자서명법상 효력 있음)</span></label>
+      <button id="signBtn" class="btn" disabled>서명 완료 · 계약 확정</button>
+      <div id="err2" class="err"></div>
+      <div class="legal">서명 시 접속 기기·IP·시각 등 접속 정보가 자동 수집되어 분쟁 시 법적 증거자료로 보존됩니다. 본 링크는 본인 확인을 거친 1건의 계약에만 사용됩니다.</div>
+    </div>
+  </div>
+
+  <!-- STEP 3: 완료 -->
+  <div id="done" class="card center hidden">
+    <div class="ok-ico"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="var(--green)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <h1>서명이 완료되었습니다</h1>
+    <p class="lead" id="doneMsg" style="margin-bottom:0;">계약이 최종 확정되었습니다. 감사합니다.</p>
+  </div>
+
+  <!-- 오류(링크 무효/만료) -->
+  <div id="fatal" class="card center hidden">
+    <h1 style="color:var(--warn);">링크를 확인할 수 없습니다</h1>
+    <p class="lead" id="fatalMsg" style="margin-bottom:0;">유효하지 않거나 만료된 서명 링크입니다.</p>
+  </div>
+</div>
+
+<script>
+  var SUPABASE_URL  = 'https://mattdctnuctulfajxuih.supabase.co';
+  var SUPABASE_ANON = 'sb_publishable_w47BgfYEE-JckMrw1bRJVw_dPIGtjx6';
+  var FN = SUPABASE_URL + '/functions/v1/sign-record';
+
+  // 토큰: /sign/<token> 경로 우선, 없으면 ?t=<token>
+  function getToken(){
+    var m = location.pathname.match(/\/sign\/([^\/?#]+)/);
+    if(m && m[1]) return decodeURIComponent(m[1]);
+    var q = new URLSearchParams(location.search).get('t');
+    return q ? q.trim() : '';
+  }
+  var TOKEN = getToken();
+  var LAST4 = '';
+
+  function $(id){ return document.getElementById(id); }
+  function show(id){ ['loading','step1','step2','done','fatal'].forEach(function(x){ $(x).classList.toggle('hidden', x!==id); }); }
+  function won(n){ return (Number(n)||0).toLocaleString('ko-KR'); }
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+
+  async function callFn(body){
+    var res = await fetch(FN, {
+      method:'POST',
+      headers:{ 'Content-Type':'application/json', 'apikey':SUPABASE_ANON, 'Authorization':'Bearer '+SUPABASE_ANON },
+      body: JSON.stringify(body)
+    });
+    return await res.json();
+  }
+
+  // ---- 시작 ----
+  if(!TOKEN){ show('fatal'); }
+  else { show('step1'); setTimeout(function(){ $('last4').focus(); }, 200); }
+
+  $('last4') && $('last4').addEventListener('input', function(){ this.value=this.value.replace(/[^0-9]/g,'').slice(0,4); });
+
+  $('verifyBtn') && $('verifyBtn').addEventListener('click', verify);
+  $('last4') && $('last4').addEventListener('keydown', function(e){ if(e.key==='Enter') verify(); });
+
+  async function verify(){
+    var v = $('last4').value.replace(/[^0-9]/g,'');
+    if(v.length!==4){ $('err1').textContent='휴대폰 뒤 4자리를 입력해 주세요.'; return; }
+    $('err1').textContent=''; $('verifyBtn').disabled=true; $('verifyBtn').textContent='확인 중…';
+    try{
+      var r = await callFn({ action:'fetch', token:TOKEN, last4:v });
+      if(!r.ok){
+        $('err1').textContent = r.error || '확인에 실패했습니다.';
+        $('verifyBtn').disabled=false; $('verifyBtn').textContent='계약서 확인하기';
+        return;
+      }
+      LAST4 = v;
+      if(r.signed){
+        $('doneMsg').textContent = '이미 서명이 완료된 계약입니다' + (r.signedAt ? ' ('+(''+r.signedAt).slice(0,16).replace('T',' ')+')' : '') + '. 감사합니다.';
+        show('done'); return;
+      }
+      renderDoc(r.contract, r.supplier);
+      show('step2');
+      initPad();
+    }catch(e){
+      $('err1').textContent='네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+      $('verifyBtn').disabled=false; $('verifyBtn').textContent='계약서 확인하기';
+    }
+  }
+
+  function renderDoc(c, s){
+    $('brandName').textContent = s.name || '조화닷컴';
+    var h = '';
+    h += '<div class="sec-title">시공 내용</div>';
+    h += '<div class="kv"><b>시공명</b>'+esc(c.title||'-')+'</div>';
+    h += '<div class="amt-grid">';
+    h += '<div class="amt big"><div class="k">총 계약금액</div><div class="v">₩ '+won(c.amount)+'</div></div>';
+    h += '<div class="amt"><div class="k">계약금</div><div class="v">₩ '+won(c.down)+'</div></div>';
+    h += '<div class="amt"><div class="k">잔금</div><div class="v">₩ '+won(c.balance)+'</div></div>';
+    h += '</div>';
+    if(c.date||c.start||c.end){
+      h += '<div style="margin-top:6px;">';
+      if(c.date)  h += '<div class="kv"><b>계약일</b>'+esc(c.date)+'</div>';
+      if(c.start) h += '<div class="kv"><b>시공 예정</b>'+esc(c.start)+'</div>';
+      if(c.end)   h += '<div class="kv"><b>시공 완료</b>'+esc(c.end)+'</div>';
+      if(c.method)h += '<div class="kv"><b>결제수단</b>'+esc(c.method)+'</div>';
+      h += '</div>';
+    }
+    h += '<div class="sec-title">발주자 (갑)</div>';
+    h += '<div class="party">';
+    h += '<span class="k">상호/성명</span><span>'+esc(c.name||'-')+'</span>';
+    if(c.ceo)   h += '<span class="k">대표자</span><span>'+esc(c.ceo)+'</span>';
+    if(c.tel)   h += '<span class="k">연락처</span><span>'+esc(c.tel)+'</span>';
+    if(c.addr)  h += '<span class="k">주소</span><span>'+esc(c.addr)+'</span>';
+    h += '</div>';
+    h += '<div class="sec-title">시공자 (을)</div>';
+    h += '<div class="party">';
+    h += '<span class="k">상호</span><span>'+esc(s.name||'조화닷컴')+'</span>';
+    if(s.ceo) h += '<span class="k">대표자</span><span>'+esc(s.ceo)+'</span>';
+    if(s.tel) h += '<span class="k">연락처</span><span>'+esc(s.tel)+'</span>';
+    if(s.bank)h += '<span class="k">입금계좌</span><span>'+esc(s.bank)+'</span>';
+    h += '</div>';
+    if(c.terms){ h += '<div class="sec-title">계약 조건</div><div class="terms">'+esc(c.terms)+'</div>'; }
+    if(c.special){ h += '<div class="sec-title">특약 사항</div><div class="terms">'+esc(c.special)+'</div>'; }
+    $('docBody').innerHTML = h;
+  }
+
+  // ---- 서명 패드 ----
+  var pad, pctx, drawing=false, hasSign=false;
+  function initPad(){
+    pad = $('pad'); if(!pad) return;
+    var rect = pad.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+    pad.width = rect.width * dpr; pad.height = rect.height * dpr;
+    pctx = pad.getContext('2d'); pctx.scale(dpr,dpr);
+    pctx.lineWidth = 2.5; pctx.lineCap='round'; pctx.lineJoin='round'; pctx.strokeStyle='#1d231f';
+    hasSign=false; updatePadStatus();
+    function pos(e){
+      var r = pad.getBoundingClientRect();
+      var t = e.touches ? e.touches[0] : e;
+      return { x:(t.clientX - r.left), y:(t.clientY - r.top) };
+    }
+    function start(e){ e.preventDefault(); drawing=true; var p=pos(e); pctx.beginPath(); pctx.moveTo(p.x,p.y); }
+    function move(e){ if(!drawing) return; e.preventDefault(); var p=pos(e); pctx.lineTo(p.x,p.y); pctx.stroke(); if(!hasSign){ hasSign=true; updatePadStatus(); } }
+    function end(e){ if(e) e.preventDefault(); drawing=false; }
+    pad.addEventListener('mousedown',start); pad.addEventListener('mousemove',move);
+    window.addEventListener('mouseup',end);
+    pad.addEventListener('touchstart',start,{passive:false});
+    pad.addEventListener('touchmove',move,{passive:false});
+    pad.addEventListener('touchend',end,{passive:false});
+  }
+  function updatePadStatus(){
+    var st=$('padStatus'); st.textContent = hasSign?'서명 완료':'미서명'; st.classList.toggle('on',hasSign);
+    refreshSignBtn();
+  }
+  function refreshSignBtn(){ $('signBtn').disabled = !(hasSign && $('agree').checked); }
+  $('clearBtn') && $('clearBtn').addEventListener('click', function(){
+    if(pctx){ pctx.clearRect(0,0,pad.width,pad.height); } hasSign=false; updatePadStatus();
+  });
+  $('agree') && $('agree').addEventListener('change', refreshSignBtn);
+
+  $('signBtn') && $('signBtn').addEventListener('click', async function(){
+    if(!hasSign || !$('agree').checked) return;
+    $('signBtn').disabled=true; $('signBtn').textContent='서명 등록 중…'; $('err2').textContent='';
+    try{
+      var dataUrl = pad.toDataURL('image/png');
+      var r = await callFn({ action:'sign', token:TOKEN, last4:LAST4, signature:dataUrl });
+      if(!r.ok){
+        $('err2').textContent = r.error || '서명 등록에 실패했습니다.';
+        $('signBtn').disabled=false; $('signBtn').textContent='서명 완료 · 계약 확정';
+        return;
+      }
+      $('doneMsg').textContent = '계약이 최종 확정되었습니다' + (r.signedAt? ' ('+r.signedAt+')':'') + '. 감사합니다.';
+      show('done');
+    }catch(e){
+      $('err2').textContent='네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.';
+      $('signBtn').disabled=false; $('signBtn').textContent='서명 완료 · 계약 확정';
+    }
+  });
+
+  window.addEventListener('resize', function(){ if(pad && !$('step2').classList.contains('hidden') && !hasSign) initPad(); });
+</script>
+</body>
+</html>
