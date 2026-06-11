@@ -2040,13 +2040,12 @@
 
     var gapTable = partyTable('발주자 (갑)', '', [
       ['상호 / 성명', g.name],['사업자등록번호', g.biz],['대표자', g.ceo],['연락처', g.tel],
-      ['이메일', g.email],['주소', g.addr],['업태', g.uptae],['업종', g.upjong],
-      ['담당자', g.mgr],['담당자 연락처', g.mgrTel]
+      ['이메일', g.email],['주소', g.addr],['업태', g.uptae],['업종', g.upjong]
     ]);
     var eulTable = partyTable('시공자 (을)', '', [
       ['상호', S.name],['사업자등록번호', S.biz],['대표자', S.ceo],['연락처', S.tel],
       ['이메일', S.email],['주소', S.addr],['업태', S.uptae],['업종', S.upjong],
-      ['담당자', reqMgr],['담당자 연락처', reqMgrTel]
+      ['담당자', g.mgr],['담당자 연락처', g.mgrTel]
     ]);
 
     var nDays = daysBetween(ctStart, ctEnd);
@@ -2581,7 +2580,7 @@
           eviRow('계약 금액', '₩ '+won(d.amount||0))+
           eviRow('계약 일자', d.date||'-')+
           eviRow('발주자(갑)', d.name)+
-          eviRow('갑 연락처', d.tel||d.mgrTel||'-')+
+          eviRow('갑 연락처', d.tel||'-')+
         '</tbody></table></div>'+
         '<div class="evi-sec"><h3>서명·체결 시점</h3><table class="rpt-table"><tbody>'+
           eviRow('서명 완료 일시', ev.signedAt)+
@@ -3233,6 +3232,19 @@
   function deleteOutwork(id){
     var w=_findOutwork(id); if(!w) return;
     confirmAction('이 작업 기록을 삭제할까요?\n('+(w.date||'')+' · '+(w.title||'')+')', async function(){
+      // 자동 기록이면(시공완료 자동 생성), 해당 시공에서 이 외주를 빼야 로드 시 다시 안 생긴다.
+      var note=w.note||'';
+      if(note.indexOf('시공완료 자동 기록')===0){
+        var mm=note.match(/#(\d+)/);
+        var saleId=mm?parseInt(mm[1],10):null;
+        var st=null; for(var i=0;i<_staff.length;i++){ if(_staff[i].id===w.staffId){ st=_staff[i]; break; } }
+        var s=(saleId!=null)?_findSale(saleId):null;
+        if(s && st){
+          s.workers=(s.workers||[]).filter(function(nm){ return nm!==st.name; });
+          s.worker=(s.workers||[]).join(', ');
+          try{ await persistSale(s); }catch(e){ console.error(e); }
+        }
+      }
       var ok=await dbDeleteOutwork(id); if(!ok) return;
       if(typeof loadOutwork==='function') await loadOutwork();
       renderOutwork(); renderStaff(); showToast('삭제했습니다.');
@@ -3778,9 +3790,15 @@ function tsToStamp(v){            // timestamptz → 'YYYY-MM-DD HH:MM'
   var p = function(n){ return (''+n).padStart(2,'0'); };
   return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes());
 }
+// 'YYYY-MM-DD HH:MM'(로컬) 또는 ISO 문자열 → 표준 ISO(UTC)로. timestamptz 저장 시 +9h 어긋남 방지.
+function stampToISO(s){
+  if(!s) return null;
+  var d = new Date(String(s).replace(' ','T'));
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
 function contractToDb(c){
   return { data:c.data||{}, status:c.status||'sent',
-    sent_at:c.sentAt||null, signed_at:c.signedAt||null,
+    sent_at:stampToISO(c.sentAt), signed_at:stampToISO(c.signedAt),
     sign_evidence:c.signEvidence||null, sign_token:c.signToken||null };
 }
 function contractFromDb(r){
