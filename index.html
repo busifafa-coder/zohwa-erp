@@ -1036,6 +1036,12 @@
       <div class="mg-big" style="color:#c0392b;" id="dmTotal">₩ 0</div>
     </div></div>
 
+    <div class="card" id="dmPendingWrap" style="display:none;"><div class="card-pad">
+      <div class="card-title">시공 전 잔금 <span class="hint" style="font-weight:500; color:var(--muted);">· 시공완료 전이라 미수금에 포함되지 않음 (참고용)</span></div>
+      <div class="mg-big" style="color:#9a6a00;" id="dmPending">₩ 0</div>
+      <div id="dmPendingList" style="margin-top:10px;"></div>
+    </div></div>
+
     <div class="send-banner">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       <span>경과 <b>4일·14일·29일</b>이 되는 고객에게는 <b>자동 안내 문자</b>가 <b>당일 14:00</b>에 발송 예약됩니다. <b>30일 이상</b>은 아래에서 직접 선택·작성해 <b>즉시 발송</b>합니다. 발송 내역은 <b>문자 발송 내역</b>에서 확인할 수 있어요.</span>
@@ -2216,7 +2222,7 @@
     ensurePeriod();
     var pk=periodKey();
     var month=0, due=0;
-    _sales.forEach(function(s){ if((s.date||'').slice(0,7)===pk){ month+=s.amount; var out=s.amount-salePaid(s); if(out>0) due+=out; } });
+    _sales.forEach(function(s){ if((s.date||'').slice(0,7)===pk){ month+=s.amount; var out=s.amount-salePaid(s); if(out>0 && s.completedDate) due+=out; } });
     document.getElementById('stMonth').textContent='₩ '+month.toLocaleString('ko-KR');
     document.getElementById('stDue').textContent='₩ '+due.toLocaleString('ko-KR');
   }
@@ -2734,9 +2740,31 @@
   function renderDueMgmt(){
     var fired=runDueAutoSms();
     var totalDue=0, tierSum=[0,0,0,0], tierCnt=[0,0,0,0], items=[];
-    _sales.forEach(function(s){ var out=s.amount-salePaid(s); if(out<=0) return; var d=s.completedDate?daysSince(s.completedDate):0; totalDue+=out; var t=dueTier(d); tierSum[t]+=out; tierCnt[t]++; items.push({s:s,out:out,d:d,t:t}); });
+    _sales.forEach(function(s){ if(!s.completedDate) return; var out=s.amount-salePaid(s); if(out<=0) return; var d=daysSince(s.completedDate); totalDue+=out; var t=dueTier(d); tierSum[t]+=out; tierCnt[t]++; items.push({s:s,out:out,d:d,t:t}); });
     items.sort(function(a,b){ return b.d-a.d; });
     document.getElementById('dmTotal').textContent='₩ '+totalDue.toLocaleString('ko-KR');
+    // 시공 전 잔금: 시공완료 안 됐는데 잔액 있는 건 → 미수금 아님(참고용으로만 표시)
+    var pendingSum=0, pendingItems=[];
+    _sales.forEach(function(s){ if(s.completedDate) return; var out=s.amount-salePaid(s); if(out<=0) return; pendingSum+=out; pendingItems.push({s:s,out:out}); });
+    var pendWrap=document.getElementById('dmPendingWrap');
+    if(pendWrap){
+      if(pendingItems.length===0){ pendWrap.style.display='none'; }
+      else {
+        pendWrap.style.display='';
+        document.getElementById('dmPending').textContent='₩ '+pendingSum.toLocaleString('ko-KR');
+        var ph='';
+        pendingItems.forEach(function(it){ var s=it.s;
+          ph += '<div class="row1">'+
+            '<span class="r-name">'+esc(s.client||'-')+'</span>'+
+            '<span class="r-amt" style="color:#9a6a00;">잔금 ₩'+won(it.out)+'</span>'+
+            '<span class="r-method" style="color:#9a6a00;">시공 진행중</span>'+
+            '<span class="r-title">'+esc(s.title||'-')+'</span>'+
+            '<button class="r-act" onclick="openWorkModal('+s.id+')">시공완료</button>'+
+          '</div>';
+        });
+        document.getElementById('dmPendingList').innerHTML=ph;
+      }
+    }
     var labels=['5일 미만','15일 미만','30일 미만','30일 이상'];
     var filter=window._dueTierFilter;
     var th='';
@@ -3427,7 +3455,7 @@
       var pyYm=(window._pYear-1)+'-'+pad2(window._pMonth);
       var monthTotal=0,pmTotal=0,pyTotal=0,monthVat=0,due=0;
       var vatBy={add:0,incl:0,none:0}, methodBy={'계좌이체':0,'현금':0,'카드':0,'기타':0}, qVat=[0,0,0,0];
-      _sales.forEach(function(s){ var mk=(s.date||'').slice(0,7); if(mk===pk){ monthTotal+=s.amount; monthVat+=saleVat(s); var vm=s.vatMode||'add'; if(vatBy[vm]===undefined)vm='add'; vatBy[vm]+=s.amount; var mt=s.method||'기타'; if(methodBy[mt]===undefined)mt='기타'; methodBy[mt]+=s.amount; var o=s.amount-salePaid(s); if(o>0)due+=o; } if(mk===pmYm)pmTotal+=s.amount; if(mk===pyYm)pyTotal+=s.amount; if((s.date||'').slice(0,4)===year){ var q=Math.ceil((parseInt((s.date||'').slice(5,7),10)||0)/3); if(q>=1&&q<=4)qVat[q-1]+=saleVat(s);} });
+      _sales.forEach(function(s){ var mk=(s.date||'').slice(0,7); if(mk===pk){ monthTotal+=s.amount; monthVat+=saleVat(s); var vm=s.vatMode||'add'; if(vatBy[vm]===undefined)vm='add'; vatBy[vm]+=s.amount; var mt=s.method||'기타'; if(methodBy[mt]===undefined)mt='기타'; methodBy[mt]+=s.amount; var o=s.amount-salePaid(s); if(o>0 && s.completedDate)due+=o; } if(mk===pmYm)pmTotal+=s.amount; if(mk===pyYm)pyTotal+=s.amount; if((s.date||'').slice(0,4)===year){ var q=Math.ceil((parseInt((s.date||'').slice(5,7),10)||0)/3); if(q>=1&&q<=4)qVat[q-1]+=saleVat(s);} });
       function pctTxt(c,b){ if(!b)return '기준 없음'; var p=Math.round((c-b)/b*1000)/10; return (p>0?'+':'')+p+'%'; }
       var items=_sales.filter(function(s){return (s.date||'').slice(0,7)===pk;}).sort(function(a,b){return (b.date||'').localeCompare(a.date||'');});
       var sum='<table class="rpt-table"><tbody>'+
@@ -3460,13 +3488,13 @@
       var totalDue=0, tierSum=[0,0,0,0]; _sales.forEach(function(s){var out=s.amount-salePaid(s); if(out>0){totalDue+=out; tierSum[dueTier(s.completedDate?daysSince(s.completedDate):0)]+=out;}});
       showSms('미수금 보고 문자', '['+SUPPLIER.name+' 미수금 보고]\n'+todayStr()+'\n\n· 총 미수금: ₩'+won(totalDue)+'\n· 5일 미만: ₩'+won(tierSum[0])+'\n· 15일 미만: ₩'+won(tierSum[1])+'\n· 30일 미만: ₩'+won(tierSum[2])+'\n· 30일 이상: ₩'+won(tierSum[3])+'\n\n(데모 보고서)');
     } else {
-      ensurePeriod(); var pk=periodKey(); var monthTotal=0,monthVat=0,due=0; _sales.forEach(function(s){ if((s.date||'').slice(0,7)===pk){monthTotal+=s.amount; monthVat+=saleVat(s);} var o=s.amount-salePaid(s); if(o>0)due+=o; });
+      ensurePeriod(); var pk=periodKey(); var monthTotal=0,monthVat=0,due=0; _sales.forEach(function(s){ if((s.date||'').slice(0,7)===pk){monthTotal+=s.amount; monthVat+=saleVat(s);} var o=s.amount-salePaid(s); if(o>0 && s.completedDate)due+=o; });
       showSms('매출 보고 문자', '['+SUPPLIER.name+' 매출 보고]\n'+pk.slice(0,4)+'년 '+parseInt(pk.slice(5,7),10)+'월\n\n· 매출금: ₩'+won(monthTotal)+'\n· 부가세(추정): ₩'+won(monthVat)+'\n· 미수금: ₩'+won(due)+'\n\n(데모 보고서)');
     }
   }
   function ceoReport(){
     ensurePeriod(); var pk=periodKey(); var monthTotal=0,monthVat=0,due=0;
-    _sales.forEach(function(s){ if((s.date||'').slice(0,7)===pk){monthTotal+=s.amount; monthVat+=saleVat(s);} var o=s.amount-salePaid(s); if(o>0)due+=o; });
+    _sales.forEach(function(s){ if((s.date||'').slice(0,7)===pk){monthTotal+=s.amount; monthVat+=saleVat(s);} var o=s.amount-salePaid(s); if(o>0 && s.completedDate)due+=o; });
     showSms('CEO 매출 보고 문자', '['+SUPPLIER.name+' 매출 보고]\n'+pk.slice(0,4)+'년 '+parseInt(pk.slice(5,7),10)+'월\n\n· 매출금: ₩'+won(monthTotal)+'\n· 부가세(추정): ₩'+won(monthVat)+'\n· 미수금: ₩'+won(due)+'\n\n(데모 보고서)');
   }
 
