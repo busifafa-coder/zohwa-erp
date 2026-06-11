@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>조화닷컴 · 견적서</title>
+<style>
+  :root{
+    --green:#2f6b4f; --green-deep:#234f3b; --green-soft:#eaf3ee;
+    --ink:#1d231f; --muted:#6b756d; --line:#dce4de; --line-soft:#eef2ef;
+    --bg:#f4f7f4; --surface:#ffffff; --warn:#c0492f; --shadow:0 6px 24px rgba(35,79,59,.10);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:'Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif; color:var(--ink);
+    background:radial-gradient(800px 420px at 100% -10%, rgba(47,107,79,.08), transparent 60%), var(--bg);
+    line-height:1.55; -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:640px; margin:0 auto; padding:18px 16px 60px;}
+  .brand{display:flex; align-items:center; gap:10px; padding:6px 2px 16px;}
+  .brand .mark{width:34px; height:34px; border-radius:10px; background:var(--green); display:grid; place-items:center; box-shadow:0 4px 12px rgba(35,79,59,.30);}
+  .brand .name{font-size:17px; font-weight:800; letter-spacing:-.02em;}
+  .brand .sub{font-size:12px; color:var(--muted); margin-top:1px;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow); padding:22px 18px; margin-bottom:14px;}
+  .doc-h{font-size:20px; font-weight:800; text-align:center; letter-spacing:.04em; padding-bottom:14px; border-bottom:2px solid var(--ink); margin-bottom:6px;}
+  .doc-date{text-align:right; font-size:12px; color:var(--muted); margin:8px 0 14px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media(max-width:520px){ .grid2{grid-template-columns:1fr;} }
+  .box{border:1px solid var(--line-soft); border-radius:10px; padding:11px 13px; background:#fcfdfc;}
+  .box .bt{font-size:11.5px; font-weight:750; color:var(--green-deep); margin-bottom:6px;}
+  .kv{font-size:13px; padding:2px 0;} .kv b{display:inline-block; min-width:62px; color:var(--muted); font-weight:600;}
+  .reqline{margin:14px 0 6px; font-size:14px; font-weight:700;}
+  table{width:100%; border-collapse:collapse; margin-top:8px; font-size:12.5px;}
+  th{background:var(--green-soft); color:var(--green-deep); font-weight:700; padding:8px 6px; text-align:center; border:1px solid var(--line);}
+  td{padding:8px 6px; border:1px solid var(--line); text-align:center;}
+  td.l{text-align:left;} td.r{text-align:right;}
+  .tot{margin-top:12px; margin-left:auto; width:100%; max-width:280px;}
+  .tot .tr{display:flex; justify-content:space-between; font-size:13px; padding:5px 2px;}
+  .tot .tr.big{border-top:2px solid var(--ink); margin-top:6px; padding-top:9px; font-size:16px; font-weight:800; color:var(--green-deep);}
+  .cond{font-size:12.5px; color:#3a423c; white-space:pre-wrap; background:var(--bg); border-radius:10px; padding:12px; margin-top:14px;}
+  .legal{font-size:11.5px; color:var(--muted); margin-top:14px; text-align:center;}
+  .btn{display:block; width:100%; font-family:inherit; font-size:15px; font-weight:700; color:#fff; background:var(--green); border:none; border-radius:12px; padding:14px; cursor:pointer; margin-top:6px;}
+  .btn:hover{background:var(--green-deep);}
+  .center{text-align:center;} .spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--green);border-radius:50%;animation:s .7s linear infinite;margin:20px auto;}
+  @keyframes s{to{transform:rotate(360deg)}}
+  .hidden{display:none !important;}
+  @media print{ .noprint{display:none !important;} body{background:#fff;} .card{box-shadow:none; border:none;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand noprint">
+    <div class="mark"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 3-9 7-11 4 2 7 6 7 11a7 7 0 0 1-7 7Z"/><path d="M11 20v-9"/></svg></div>
+    <div><div class="name" id="brandName">조화닷컴</div><div class="sub">견적서</div></div>
+  </div>
+
+  <div id="loading" class="card center"><div class="spin"></div><div style="font-size:13px;color:var(--muted);">견적서를 불러오는 중…</div></div>
+
+  <div id="docCard" class="card hidden">
+    <div class="doc-h">견 적 서</div>
+    <div class="doc-date" id="docDate"></div>
+    <div class="grid2">
+      <div class="box" id="boxSupplier"></div>
+      <div class="box" id="boxClient"></div>
+    </div>
+    <div class="reqline" id="reqLine"></div>
+    <div id="itemsWrap"></div>
+    <div class="tot" id="totals"></div>
+    <div class="cond" id="condBox"></div>
+    <div class="legal">본 견적서는 모바일·PC에서 확인용으로 제공됩니다. 문의는 위 공급자 연락처로 부탁드립니다.</div>
+  </div>
+
+  <button id="printBtn" class="btn noprint hidden" onclick="window.print()">인쇄 / PDF로 저장</button>
+
+  <div id="fatal" class="card center hidden">
+    <h2 style="color:var(--warn); margin:6px 0;">견적서를 확인할 수 없습니다</h2>
+    <p style="font-size:13px; color:var(--muted);" id="fatalMsg">유효하지 않거나 만료된 견적 링크입니다.</p>
+  </div>
+</div>
+
+<script>
+  var SUPABASE_URL  = 'https://mattdctnuctulfajxuih.supabase.co';
+  var SUPABASE_ANON = 'sb_publishable_w47BgfYEE-JckMrw1bRJVw_dPIGtjx6';
+  var FN = SUPABASE_URL + '/functions/v1/sign-record';
+
+  function getToken(){
+    var m = location.pathname.match(/\/quote\/([^\/?#]+)/);
+    if(m && m[1]) return decodeURIComponent(m[1]);
+    var q = new URLSearchParams(location.search).get('t');
+    return q ? q.trim() : '';
+  }
+  var TOKEN = getToken();
+  function $(id){ return document.getElementById(id); }
+  function won(n){ return (Number(n)||0).toLocaleString('ko-KR'); }
+  function esc(s){ return (s==null?'':String(s)).replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];}); }
+  function show(id){ ['loading','docCard','fatal'].forEach(function(x){ $(x).classList.toggle('hidden', x!==id); }); }
+
+  // 금액 계산 (앱 getFinalAmounts 동일 규칙)
+  function finalAmounts(q){
+    var sum=0; (q.items||[]).forEach(function(it){ sum += (Number(it.amt)|| (Number(it.price)||0)*(Number(it.qty)||0)); });
+    var vm=q.vatMode||'add';
+    if(q.confirmMode==='manual' && q.manualConfirmed){
+      var m=Number(q.manualAmount)||0;
+      if(vm==='add'){ var mv=Math.round(m*0.1); return {supply:m,vat:mv,total:m+mv,vatApplied:true}; }
+      if(vm==='incl'){ var ms=Math.round(m/1.1); return {supply:ms,vat:m-ms,total:m,vatApplied:true}; }
+      return {supply:m,vat:0,total:m,vatApplied:false};
+    }
+    if(vm==='add'){ var v=Math.round(sum*0.1); return {supply:sum,vat:v,total:sum+v,vatApplied:true}; }
+    if(vm==='incl'){ var s=Math.round(sum/1.1); return {supply:s,vat:sum-s,total:sum,vatApplied:true}; }
+    return {supply:sum,vat:0,total:sum,vatApplied:false};
+  }
+
+  async function load(){
+    if(!TOKEN){ show('fatal'); return; }
+    try{
+      var res = await fetch(FN, {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'apikey':SUPABASE_ANON, 'Authorization':'Bearer '+SUPABASE_ANON },
+        body: JSON.stringify({ action:'quote', token:TOKEN })
+      });
+      var r = await res.json();
+      if(!r.ok){ $('fatalMsg').textContent = r.error || '견적서를 불러오지 못했습니다.'; show('fatal'); return; }
+      render(r.quote, r.supplier);
+      show('docCard');
+      $('printBtn').classList.remove('hidden');
+    }catch(e){
+      $('fatalMsg').textContent='네트워크 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.'; show('fatal');
+    }
+  }
+
+  function render(q, s){
+    $('brandName').textContent = s.name || '조화닷컴';
+    $('docDate').textContent = (q.created ? ('견적일 '+q.created) : '');
+
+    var sup = '<div class="bt">공급자</div>';
+    sup += '<div class="kv"><b>상호</b>'+esc(s.name||'조화닷컴')+'</div>';
+    if(s.ceo)   sup += '<div class="kv"><b>대표자</b>'+esc(s.ceo)+'</div>';
+    if(s.biz)   sup += '<div class="kv"><b>사업자</b>'+esc(s.biz)+'</div>';
+    if(s.tel)   sup += '<div class="kv"><b>연락처</b>'+esc(s.tel)+'</div>';
+    if(s.addr)  sup += '<div class="kv"><b>주소</b>'+esc(s.addr)+'</div>';
+    if(s.bank)  sup += '<div class="kv"><b>입금계좌</b>'+esc(s.bank)+'</div>';
+    $('boxSupplier').innerHTML = sup;
+
+    var cl = '<div class="bt">수신 (고객)</div>';
+    cl += '<div class="kv"><b>상호/성명</b>'+esc(q.client||'-')+'</div>';
+    if(q.tel)  cl += '<div class="kv"><b>연락처</b>'+esc(q.tel)+'</div>';
+    if(q.addr) cl += '<div class="kv"><b>현장</b>'+esc(q.addr)+'</div>';
+    if(q.mgr)  cl += '<div class="kv"><b>담당</b>'+esc(q.mgr)+(q.mgrTel?(' ('+esc(q.mgrTel)+')'):'')+'</div>';
+    $('boxClient').innerHTML = cl;
+
+    var req = (q.work||'').split('\n')[0] || '';
+    $('reqLine').textContent = req ? ('견적 요청 내용 : '+req) : '';
+
+    var items = q.items||[];
+    var rows = '';
+    items.forEach(function(it){
+      var amt = (Number(it.amt) || (Number(it.price)||0)*(Number(it.qty)||0));
+      rows += '<tr>'+
+        '<td class="l">'+esc(it.name||'')+(it.note?('<br><span style="color:#888;font-size:11px;">'+esc(it.note)+'</span>'):'')+'</td>'+
+        '<td>'+esc(it.unit||'')+'</td>'+
+        '<td class="r">'+won(it.price)+'</td>'+
+        '<td>'+esc(it.qty!=null?it.qty:'')+'</td>'+
+        '<td class="r">'+won(amt)+'</td>'+
+      '</tr>';
+    });
+    if(!rows) rows = '<tr><td colspan="5" style="color:#999;padding:16px;">견적 항목 없음</td></tr>';
+    $('itemsWrap').innerHTML =
+      '<table><thead><tr><th style="width:34%;">품목</th><th>단위</th><th>단가</th><th>수량</th><th>금액</th></tr></thead><tbody>'+rows+'</tbody></table>';
+
+    var a = finalAmounts(q);
+    var th = '<div class="tr"><span>공급가액</span><span>₩ '+won(a.supply)+'</span></div>';
+    if(a.vatApplied) th += '<div class="tr"><span>부가세 (10%)</span><span>₩ '+won(a.vat)+'</span></div>';
+    th += '<div class="tr big"><span>합계 금액</span><span>₩ '+won(a.total)+'</span></div>';
+    $('totals').innerHTML = th;
+
+    $('condBox').textContent = q.cond || '본 견적은 견적일로부터 30일간 유효합니다.\n결제조건 : 계약금 / 잔금 협의';
+  }
+
+  load();
+</script>
+</body>
+</html>

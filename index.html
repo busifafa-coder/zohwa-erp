@@ -1622,7 +1622,7 @@
   }
 
   function quoteSmsText(q){
-    var link='https://zh.zohwa.com/quote/'+q.id+'-'+(q.id*7+19);
+    var link='https://zh.zohwa.com/quote/'+(q.viewToken || (q.id+'-'+(q.id*7+19)));
     return '안녕하세요, '+(q.client||'고객')+'님. '+(SUPPLIER.name||'조화닷컴')+'입니다.^^\n\n요청하신 ['+(firstLine(q.work)||'시공')+'] 견적서를 보내드립니다.\n· 견적 금액 ₩'+won(q.total||0)+' 원\n\n아래 주소를 클릭하시면 견적서를 모바일·PC에서 바로 확인하실 수 있습니다.\n'+link+'\n\n궁금하신 점은 회신 부탁드립니다. 감사합니다.';
   }
   async function saveQuote(){
@@ -2719,19 +2719,9 @@
     return false;
   }
   function runDueAutoSms(){
-    var fired=0;
-    _sales.forEach(function(s){
-      if(!s.completedDate) return;
-      var out=s.amount-salePaid(s); if(out<=0) return;
-      var d=daysSince(s.completedDate);
-      [4,14,29].forEach(function(ms){
-        if(d===ms && !dueAutoSent(s.id, ms)){
-          logSms({kind:'due', due:true, client:s.client||'고객', phone:resolveSalePhone(s), text:applyTmpl(s), milestone:ms, refId:s.id});
-          fired++;
-        }
-      });
-    });
-    return fired;
+    // 미수 자동 안내(완료 후 4·14·29일, 매일 14:00)는 서버(pg_cron + cron-due-sms)가 단독 발송한다.
+    // 앱에서는 예약 행을 만들지 않는다(중복·충돌 방지). 발송 결과는 sent_sms로 동기화되어 배지에 표시됨.
+    return 0;
   }
   function dueSentInfo(s){
     for(var i=0;i<_sentSms.length;i++){ var e=_sentSms[i]; if(e.kind==='due' && e.refId===s.id){ return {sent:true, label:e.status}; } }
@@ -3677,13 +3667,15 @@ function quoteToDb(q){
   return { client:q.client, tel:q.tel, addr:q.addr, work:q.work, mgr:q.mgr,
     mgr_tel:q.mgrTel, cond:q.cond, items:q.items, total:q.total,
     vat_mode:q.vatMode, confirm_mode:q.confirmMode,
-    manual_confirmed:q.manualConfirmed, manual_amount:q.manualAmount };
+    manual_confirmed:q.manualConfirmed, manual_amount:q.manualAmount,
+    view_token:q.viewToken||null };
 }
 function quoteFromDb(r){
   return { id:r.id, client:r.client, tel:r.tel, addr:r.addr, work:r.work, mgr:r.mgr,
     mgrTel:r.mgr_tel, cond:r.cond, items:r.items, total:r.total,
     vatMode:r.vat_mode, confirmMode:r.confirm_mode,
-    manualConfirmed:r.manual_confirmed, manualAmount:r.manual_amount, created:(r.created_at||'').slice(0,10) };
+    manualConfirmed:r.manual_confirmed, manualAmount:r.manual_amount,
+    viewToken:r.view_token||null, created:(r.created_at||'').slice(0,10) };
 }
 
 // 화면 진입 시 1회 호출 → 기존 메모리 배열 채우고 기존 렌더 재사용
@@ -3695,6 +3687,7 @@ async function loadQuotes(){
 }
 // 기존 saveQuote 의 `_quotes.push(...)` 자리를 이걸로 교체 (반환 data.id = DB 부여 id)
 async function dbInsertQuote(q){
+  if(!q.viewToken && typeof genSignToken==='function') q.viewToken = genSignToken();
   const { data, error } = await db.from('quotes').insert(quoteToDb(q)).select().single();
   if (error){ alert('저장 실패: ' + error.message); return null; }
   return quoteFromDb(data);

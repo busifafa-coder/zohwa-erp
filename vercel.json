@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/sign/:token", "destination": "/sign.html" }
+    { "source": "/sign/:token", "destination": "/sign.html" },
+    { "source": "/quote/:token", "destination": "/quote.html" }
   ]
 }
