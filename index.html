@@ -845,8 +845,6 @@
         <div class="f"><label>연락처</label><input class="in" id="ctcTel" type="tel" inputmode="tel" placeholder="010-0000-0000"></div>
         <div class="f"><label>업태</label><input class="in" id="ctcUptae" placeholder="예: 도소매 · 서비스"></div>
         <div class="f"><label>업종</label><input class="in" id="ctcUpjong" placeholder="예: 음식점 · 카페"></div>
-        <div class="f"><label>담당자</label><input class="in" id="ctcMgr" placeholder="담당자명"></div>
-        <div class="f"><label>담당자 연락처</label><input class="in" id="ctcMgrTel" type="tel" inputmode="tel" placeholder="010-0000-0000"></div>
         <div class="f wide"><label>이메일</label><input class="in" id="ctcEmail" type="email" inputmode="email" placeholder="example@email.com"></div>
         <div class="f wide"><label>주소</label><input class="in" id="ctcAddr" placeholder="예: 서울 강남구 ○○로 12, 1층"></div>
       </div>
@@ -1659,7 +1657,7 @@
     });
   }
   function useQuoteForContract(id){ var q=_findQuote(id); if(!q) return; startContractFromQuote(q); }
-  function startContractFromQuote(q){
+  function startContractFromQuote(q, silent){
     if(!q) return;
     resetContractForm();
     window._editingContractId=null; window._ctFormBack='quotes'; window._sourceQuoteId=q.id;
@@ -1667,14 +1665,14 @@
     document.getElementById('ctcName').value=q.client||'';
     document.getElementById('ctcTel').value=q.tel||'';
     document.getElementById('ctcAddr').value=q.addr||'';
-    document.getElementById('ctcMgr').value=q.mgr||'';
-    document.getElementById('ctcMgrTel').value=q.mgrTel||'';
+    document.getElementById('reqMgr').value=q.mgr||'';        // 담당자 = 시공자(을) 소속
+    document.getElementById('reqMgrTel').value=q.mgrTel||'';
     document.getElementById('cSumWork').textContent=firstLine(q.work)||'(시공내용 첫 줄)';
     setCtTotal(q.total||0);
     document.getElementById('ctDate').value=isoToday();
     recalcBalance(); setContractMode(false);
     showView('contract'); setTimeout(setupSig,30); updateSigStatus();
-    showToast('견적 내용을 계약서로 불러왔습니다. 계약금 입력 후 [계약서 등록 · 갑에게 발송]하세요.');
+    if(!silent) showToast('견적 내용을 계약서로 불러왔습니다. 계약금 입력 후 [계약서 등록 · 갑에게 발송]하세요.');
   }
   function renderQuotes(){
     var list=document.getElementById('quoteList');
@@ -1904,8 +1902,14 @@
     }
     window._editingQuoteId = null;
     resetQuoteForm();
-    // 2) 저장된 견적 내용으로 계약서 작성(저장된 견적과 연결 · _sourceQuoteId 설정)
-    startContractFromQuote(saved);
+    // 고객에게 견적서 확인 문자 발송 (saveQuote와 동일)
+    if(saved && (saved.client || saved.tel)){
+      logSms({kind:'quote', client:saved.client||'고객', phone:saved.tel||'', text:quoteSmsText(saved), refId:saved.id});
+    }
+    // 저장된 견적 내용으로 계약서 작성(저장된 견적과 연결 · _sourceQuoteId 설정)
+    startContractFromQuote(saved, true);
+    if(saved && (saved.client || saved.tel)) showToast('✓ 고객에게 견적서 문자 발송 · 이어서 계약서를 작성하세요.');
+    else showToast('견적 내용을 계약서로 불러왔습니다. 계약금 입력 후 [계약서 등록 · 갑에게 발송]하세요.');
   }
   function recalcBalance(){
     var total = window._ctTotal || 0;
@@ -2019,7 +2023,6 @@
       name:document.getElementById('ctcName').value, biz:document.getElementById('ctcBiz').value,
       ceo:document.getElementById('ctcCeo').value, tel:document.getElementById('ctcTel').value,
       uptae:document.getElementById('ctcUptae').value, upjong:document.getElementById('ctcUpjong').value,
-      mgr:document.getElementById('ctcMgr').value, mgrTel:document.getElementById('ctcMgrTel').value,
       email:document.getElementById('ctcEmail').value, addr:document.getElementById('ctcAddr').value
     };
     var reqMgr=document.getElementById('reqMgr').value;
@@ -2045,7 +2048,7 @@
     var eulTable = partyTable('시공자 (을)', '', [
       ['상호', S.name],['사업자등록번호', S.biz],['대표자', S.ceo],['연락처', S.tel],
       ['이메일', S.email],['주소', S.addr],['업태', S.uptae],['업종', S.upjong],
-      ['담당자', g.mgr],['담당자 연락처', g.mgrTel]
+      ['담당자', reqMgr],['담당자 연락처', reqMgrTel]
     ]);
 
     var nDays = daysBetween(ctStart, ctEnd);
@@ -2248,7 +2251,7 @@
     function v(id){ return document.getElementById(id).value; }
     return {
       name:v('ctcName'), biz:v('ctcBiz'), ceo:v('ctcCeo'), tel:v('ctcTel'),
-      uptae:v('ctcUptae'), upjong:v('ctcUpjong'), mgr:v('ctcMgr'), mgrTel:v('ctcMgrTel'),
+      uptae:v('ctcUptae'), upjong:v('ctcUpjong'), mgr:v('reqMgr'), mgrTel:v('reqMgrTel'),
       email:v('ctcEmail'), addr:v('ctcAddr'),
       title: window._ctWork || firstLine(v('custWork')),
       amount: window._ctTotal || 0,
@@ -2267,8 +2270,8 @@
     document.getElementById('ctcTel').value=d.tel||'';
     document.getElementById('ctcUptae').value=d.uptae||'';
     document.getElementById('ctcUpjong').value=d.upjong||'';
-    document.getElementById('ctcMgr').value=d.mgr||'';
-    document.getElementById('ctcMgrTel').value=d.mgrTel||'';
+    document.getElementById('reqMgr').value=d.mgr||'';
+    document.getElementById('reqMgrTel').value=d.mgrTel||'';
     document.getElementById('ctcEmail').value=d.email||'';
     document.getElementById('ctcAddr').value=d.addr||'';
     document.getElementById('ctDate').value=d.date||'';
@@ -2284,7 +2287,7 @@
     recalcBalance(); updateSigStatus();
   }
   function resetContractForm(){
-    ['ctcName','ctcBiz','ctcCeo','ctcTel','ctcUptae','ctcUpjong','ctcMgr','ctcMgrTel','ctcEmail','ctcAddr','ctStart','ctEnd','ctSpecial','ctDown'].forEach(function(id){ document.getElementById(id).value=''; });
+    ['ctcName','ctcBiz','ctcCeo','ctcTel','ctcUptae','ctcUpjong','reqMgr','reqMgrTel','ctcEmail','ctcAddr','ctStart','ctEnd','ctSpecial','ctDown'].forEach(function(id){ var _e=document.getElementById(id); if(_e) _e.value=''; });
     document.getElementById('ctTerms').value=DEFAULT_TERMS;
     document.getElementById('ctDate').value=isoToday();
     document.getElementById('ctMethod').value='계좌이체';
@@ -2326,7 +2329,7 @@
         var ok = await dbUpdateContract(rec.id, rec);
         if(!ok) return;
         if(wasSigned){ await dbDeleteSalesByContract(rec.id); _sales=_sales.filter(function(s){ return s.contractId!==rec.id; }); }  // 서명 무효화 → 매출 회수
-        logSms({kind:'contract', client:d.name||'고객', phone:d.tel||d.mgrTel||'', text:contractSmsText(rec), refId:rec.id});
+        logSms({kind:'contract', client:d.name||'고객', phone:d.tel||'', text:contractSmsText(rec), refId:rec.id});
       }
       window._editingContractId=null; window._sourceQuoteId=null;
       resetContractForm();
@@ -2340,7 +2343,7 @@
       var saved = await dbInsertContract(rec2);
       if(!saved) return;   // 저장 실패 시 중단
       if(window._sourceQuoteId){ await dbDeleteQuote(window._sourceQuoteId); window._sourceQuoteId=null; await loadQuotes(); }  // 견적→계약 전환: 원본 견적 제거
-      logSms({kind:'contract', client:d.name||'고객', phone:d.tel||d.mgrTel||'', text:contractSmsText(saved), refId:saved.id});
+      logSms({kind:'contract', client:d.name||'고객', phone:d.tel||'', text:contractSmsText(saved), refId:saved.id});
       resetContractForm();
       await loadContracts();
       window._contractsTab='sent'; _refreshAll();
@@ -2351,7 +2354,7 @@
   async function resendContractSms(id){
     var c=_findContract(id); if(!c) return; var d=c.data||{};
     if(!c.signToken){ c.signToken=genSignToken(); await dbUpdateContract(c.id, c); }
-    var sm=logSms({kind:'contract', client:d.name||'고객', phone:d.tel||d.mgrTel||'', text:contractSmsText(c), refId:id});
+    var sm=logSms({kind:'contract', client:d.name||'고객', phone:d.tel||'', text:contractSmsText(c), refId:id});
     renderContracts(); showToast('✓ 전자서명 요청 문자를 재발송했습니다.');
   }
 
@@ -3366,7 +3369,7 @@
   }
   function resolveSalePhone(s){
     if(!s) return '';
-    if(s.contractId){ var c=_findContract(s.contractId); if(c&&c.data){ return c.data.tel||c.data.mgrTel||''; } }
+    if(s.contractId){ var c=_findContract(s.contractId); if(c&&c.data){ return c.data.tel||''; } }
     return s.tel||'';
   }
   function smsKindLabel(k){ return k==='quote'?'견적':(k==='contract'?'계약':(k==='due'?'미수금':(k==='work'?'시공':'문자'))); }
