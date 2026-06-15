@@ -31,6 +31,15 @@
   .brand .mark svg{width:18px; height:18px;}
   .brand .name{font-size:17px; font-weight:800; letter-spacing:-.02em;}
   .brand .sub{font-size:12px; color:var(--muted); font-weight:500; margin-top:1px;}
+  /* 회사 전환 스위치 (조화닷컴 ⇄ 조화마켓) */
+  .company-switch{font-family:inherit; font-size:17px; font-weight:800; letter-spacing:-.02em;
+    color:var(--ink); border:1.5px solid var(--line); background:#fff;
+    border-radius:9px; padding:3px 26px 3px 9px; cursor:pointer; line-height:1.2;
+    -webkit-appearance:none; appearance:none; outline:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%232f6b4f' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><path d='m6 9 6 6 6-6'/></svg>");
+    background-repeat:no-repeat; background-position:right 7px center;}
+  .company-switch:hover{border-color:var(--green);}
+  .company-switch:focus{border-color:var(--green); box-shadow:0 0 0 3px rgba(47,107,79,.12);}
   .head-right{display:flex; align-items:center; gap:9px;}
   .gear{display:inline-flex; align-items:center; gap:6px; font-family:inherit; font-size:12.5px; font-weight:600; color:var(--muted); background:#fff; border:1px solid var(--line); border-radius:999px; padding:6px 12px; cursor:pointer; transition:all .15s;}
   .gear:hover{border-color:var(--green); color:var(--green-deep);}
@@ -627,7 +636,12 @@
   <div class="app-inner">
     <div class="brand">
       <div class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 3-9 7-11 4 2 7 6 7 11a7 7 0 0 1-7 7Z"/><path d="M11 20v-9"/></svg></div>
-      <div><div class="name">조화닷컴</div><div class="sub">플랜테리어 업무 시스템</div></div>
+      <div><div class="name">
+        <select id="companySwitch" class="company-switch" onchange="switchCompany(this.value)" title="회사 전환">
+          <option value="zohwa_com">조화닷컴</option>
+          <option value="zohwa_market">조화마켓</option>
+        </select>
+      </div><div class="sub">플랜테리어 업무 시스템</div></div>
     </div>
     <div class="head-right">
       <button id="gearSettings" class="gear" onclick="openSettings()" title="회사 정보 설정">
@@ -3623,6 +3637,24 @@ const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 let CURRENT_ROLE = null;   // 'ceo' | 'manager' | 'staff' — 로그인 후 채워짐
 let LAST_LOGIN_ERR = '';   // 로그인 화면에 표시할 마지막 오류 메시지
 
+// ---------- 멀티회사(조화닷컴 / 조화마켓) ----------
+// 모든 데이터 조회/저장은 '현재 선택한 회사'로 필터·표시된다.
+// 계정(profiles)은 공용 — 같은 아이디로 두 회사 모두 관리.
+const COMPANY_LABELS = { zohwa_com: '조화닷컴', zohwa_market: '조화마켓' };
+let CURRENT_COMPANY = localStorage.getItem('erp_company') || 'zohwa_com';
+if (!COMPANY_LABELS[CURRENT_COMPANY]) CURRENT_COMPANY = 'zohwa_com';
+// 회사 전환: 선택을 저장하고 새로고침 → 새 회사 데이터로 깨끗하게 다시 로드(안전).
+function switchCompany(co){
+  if (!COMPANY_LABELS[co] || co === CURRENT_COMPANY) return;
+  localStorage.setItem('erp_company', co);
+  location.reload();
+}
+// 헤더 셀렉트를 현재 회사로 맞춤 (로그인·세션복구 시 호출).
+function syncCompanyUI(){
+  const sel = document.getElementById('companySwitch');
+  if (sel) sel.value = CURRENT_COMPANY;
+}
+
 // ---------- 로그인 (아이디 + 비밀번호) ----------
 // "아이디"를 내부 이메일(아이디@zohwa.com)로 매핑해 Auth 사용.
 async function login(username, password){
@@ -3665,6 +3697,7 @@ async function doLogin(){
 
 // ---------- 역할별 화면 게이팅 (UI 1차 차단 · 진짜 차단은 RLS) ----------
 function applyRoleGating(){
+  syncCompanyUI();   // 헤더 회사 셀렉트를 현재 회사로 표시
   const isStaff = CURRENT_ROLE === 'staff';
   // 직원: 시공 관리 카드만 노출. 견적·계약·정산 카드 + 설정 기어 숨김.
   ['cardQuote','cardContract','cardSettle','gearSettings','navQuote','navContract','navSettle'].forEach(id=>{
@@ -3711,7 +3744,7 @@ function quoteToDb(q){
     mgr_tel:q.mgrTel, cond:q.cond, items:q.items, total:q.total,
     vat_mode:q.vatMode, confirm_mode:q.confirmMode,
     manual_confirmed:q.manualConfirmed, manual_amount:q.manualAmount,
-    view_token:q.viewToken||null };
+    view_token:q.viewToken||null, company:CURRENT_COMPANY };
 }
 function quoteFromDb(r){
   return { id:r.id, client:r.client, tel:r.tel, addr:r.addr, work:r.work, mgr:r.mgr,
@@ -3723,7 +3756,7 @@ function quoteFromDb(r){
 
 // 화면 진입 시 1회 호출 → 기존 메모리 배열 채우고 기존 렌더 재사용
 async function loadQuotes(){
-  const { data, error } = await db.from('quotes').select('*').order('id', { ascending:false });
+  const { data, error } = await db.from('quotes').select('*').eq('company', CURRENT_COMPANY).order('id', { ascending:false });
   if (error){ console.error(error); alert('견적 불러오기 실패: ' + error.message); return; }
   _quotes = data.map(quoteFromDb);
   renderQuotes?.();
@@ -3760,10 +3793,11 @@ let _supplierRowId = null;
 function supplierToDb(s){
   return { name:s.name||'조화닷컴', biz:s.biz||null, ceo:s.ceo||null, tel:s.tel||null,
     uptae:s.uptae||null, upjong:s.upjong||null, email:s.email||null, addr:s.addr||null,
-    bank:s.bank||null, stamp:s.stamp||null, updated_at:new Date().toISOString() };
+    bank:s.bank||null, stamp:s.stamp||null, company:CURRENT_COMPANY, updated_at:new Date().toISOString() };
 }
 async function loadSupplier(){
-  const { data, error } = await db.from('supplier').select('*').order('id').limit(1);
+  _supplierRowId = null;   // 회사 전환 시 다른 회사 행을 덮어쓰지 않도록 초기화
+  const { data, error } = await db.from('supplier').select('*').eq('company', CURRENT_COMPANY).order('id').limit(1);
   if (error){ console.error(error); return; }
   if (data && data.length){
     const r = data[0]; _supplierRowId = r.id;
@@ -3794,7 +3828,7 @@ function smsToDb(e){
   return { kind:e.kind, client:e.client||null, phone:e.phone||null,
     body:e.text||null, send_at:e.when||null, when_label:e.whenLabel||null,
     status:e.status||'발송완료', milestone:(e.milestone!=null?String(e.milestone):null),
-    ref_id:(e.refId!=null?e.refId:null) };
+    ref_id:(e.refId!=null?e.refId:null), company:CURRENT_COMPANY };
 }
 function smsFromDb(r){
   return { id:r.id, kind:r.kind, client:r.client||'', phone:r.phone||'',
@@ -3802,7 +3836,7 @@ function smsFromDb(r){
     status:r.status||'발송완료', milestone:r.milestone, refId:r.ref_id, createdAt:(r.created_at||'') };
 }
 async function loadSms(){
-  const { data, error } = await db.from('sent_sms').select('*').order('id', { ascending:false });
+  const { data, error } = await db.from('sent_sms').select('*').eq('company', CURRENT_COMPANY).order('id', { ascending:false });
   if (error){ console.error(error); return; }
   if (typeof _sentSms !== 'undefined') _sentSms = (data||[]).map(smsFromDb);
 }
@@ -3830,7 +3864,7 @@ function stampToISO(s){
 function contractToDb(c){
   return { data:c.data||{}, status:c.status||'sent',
     sent_at:stampToISO(c.sentAt), signed_at:stampToISO(c.signedAt),
-    sign_evidence:c.signEvidence||null, sign_token:c.signToken||null };
+    sign_evidence:c.signEvidence||null, sign_token:c.signToken||null, company:CURRENT_COMPANY };
 }
 function contractFromDb(r){
   return { id:r.id, data:r.data||{}, status:r.status||'sent',
@@ -3839,7 +3873,7 @@ function contractFromDb(r){
     signEvidence:r.sign_evidence||null, signToken:r.sign_token||null };
 }
 async function loadContracts(){
-  const { data, error } = await db.from('contracts').select('*').order('id', { ascending:false });
+  const { data, error } = await db.from('contracts').select('*').eq('company', CURRENT_COMPANY).order('id', { ascending:false });
   if (error){ console.error(error); return; }
   if (typeof _contracts !== 'undefined') _contracts = (data||[]).map(contractFromDb);
 }
@@ -3874,7 +3908,7 @@ function saleToDb(s){
     balance:(s.balance!=null?s.balance:null), paid:s.paid||0,
     start_date:s.start||null, completed_date:s.completedDate||null,
     worker:s.worker||null, workers:(Array.isArray(s.workers)?s.workers:[]),
-    method:s.method||null, vat_mode:s.vatMode||null, sale_date:s.date||null };
+    method:s.method||null, vat_mode:s.vatMode||null, sale_date:s.date||null, company:CURRENT_COMPANY };
 }
 function saleFromDb(r){
   return { id:r.id, source:r.source, contractId:r.contract_id,
@@ -3886,7 +3920,7 @@ function saleFromDb(r){
     method:r.method||'계좌이체', vatMode:r.vat_mode||'add', date:r.sale_date||'' };
 }
 async function loadSales(){
-  const { data, error } = await db.from('sales').select('*').order('id', { ascending:false });
+  const { data, error } = await db.from('sales').select('*').eq('company', CURRENT_COMPANY).order('id', { ascending:false });
   if (error){ console.error(error); return; }
   if (typeof _sales !== 'undefined') _sales = (data||[]).map(saleFromDb);
 }
@@ -3915,10 +3949,10 @@ function persistSale(s){ if(typeof dbUpdateSale==='function' && s && s.id!=null)
 // =========================================================
 // 월별 시공 계획표 메모(schedules) — sched_date·memo. 조회 전체 / 쓰기 CEO·매니저.
 // =========================================================
-function schedToDb(e){ return { sched_date:e.date||null, title:e.title||null, worker:e.worker||null, count:e.count||0, memo:e.memo||null }; }
+function schedToDb(e){ return { sched_date:e.date||null, title:e.title||null, worker:e.worker||null, count:e.count||0, memo:e.memo||null, company:CURRENT_COMPANY }; }
 function schedFromDb(r){ return { id:r.id, date:r.sched_date||'', title:r.title||'', worker:r.worker||'', count:r.count||0, memo:r.memo||'' }; }
 async function loadSchedules(){
-  const { data, error } = await db.from('schedules').select('*').order('id');
+  const { data, error } = await db.from('schedules').select('*').eq('company', CURRENT_COMPANY).order('id');
   if (error){ console.error(error); return; }
   if (typeof _schedules !== 'undefined') _schedules = (data||[]).map(schedFromDb);
 }
@@ -3941,10 +3975,10 @@ async function dbDeleteSchedule(id){
 // =========================================================
 // 직원·외주(staff) — 조회 전체 / 쓰기 CEO·매니저.  role↔position.
 // =========================================================
-function staffToDb(p){ return { name:p.name||null, tel:p.tel||null, position:p.role||null, kind:p.kind||'직원' }; }
+function staffToDb(p){ return { name:p.name||null, tel:p.tel||null, position:p.role||null, kind:p.kind||'직원', company:CURRENT_COMPANY }; }
 function staffFromDb(r){ return { id:r.id, name:r.name||'', tel:r.tel||'', role:r.position||'', kind:r.kind||'직원' }; }
 async function loadStaff(){
-  const { data, error } = await db.from('staff').select('*').order('id');
+  const { data, error } = await db.from('staff').select('*').eq('company', CURRENT_COMPANY).order('id');
   if (error){ console.error(error); return; }
   if (typeof _staff !== 'undefined') _staff = (data||[]).map(staffFromDb);
 }
@@ -3968,10 +4002,10 @@ async function dbDeleteStaff(id){
 // 외주 작업 일지(outwork) — staff_id·work_date·title·note. 조회 전체 / 쓰기 CEO·매니저.
 //   시공완료 시 배정된 외주별로 자동 기록 생성 → 작업기록·총 작업일수에 반영.
 // =========================================================
-function outworkToDb(w){ return { staff_id:w.staffId, work_date:w.date||null, title:w.title||null, note:w.note||null, days:(w.days!=null?w.days:1) }; }
+function outworkToDb(w){ return { staff_id:w.staffId, work_date:w.date||null, title:w.title||null, note:w.note||null, days:(w.days!=null?w.days:1), company:CURRENT_COMPANY }; }
 function outworkFromDb(r){ return { id:r.id, staffId:r.staff_id, date:r.work_date||'', title:r.title||'', note:r.note||'', days:(r.days!=null?Number(r.days):1) }; }
 async function loadOutwork(){
-  const { data, error } = await db.from('outwork').select('*').order('id');
+  const { data, error } = await db.from('outwork').select('*').eq('company', CURRENT_COMPANY).order('id');
   if (error){ console.error(error); return; }
   if (typeof _outwork !== 'undefined') _outwork = (data||[]).map(outworkFromDb);
 }
